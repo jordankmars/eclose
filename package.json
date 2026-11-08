@@ -31,17 +31,22 @@
 		"build": "tsdown",
 		"dev": "tsdown --watch",
 		"typecheck": "tsc --noEmit",
-		"prepack": "pnpm build",
+		"prepack": "pnpm build && pnpm size",
 		"lint": "biome check .",
 		"format": "biome check --write .",
 		"test": "vitest run",
-		"play": "vite playground"
+		"play": "vite playground",
+		"size": "node scripts/size.mjs"
 	},
 	"peerDependencies": {
-		"react": ">=18"
+		"react": ">=18",
+		"react-dom": ">=18"
 	},
 	"peerDependenciesMeta": {
 		"react": {
+			"optional": true
+		},
+		"react-dom": {
 			"optional": true
 		}
 	},
@@ -52,9 +57,11 @@
 	"devDependencies": {
 		"@arethetypeswrong/core": "^0.18.5",
 		"@biomejs/biome": "2.6.6",
+		"@types/jsdom": "^30.0.0",
 		"@types/react": "^19.3.0",
 		"@types/react-dom": "^19.3.0",
 		"@vitejs/plugin-react": "^6.2.1",
+		"jsdom": "^31.0.0",
 		"publint": "^0.3.25",
 		"react": "^19.3.1",
 		"react-dom": "^19.3.1",

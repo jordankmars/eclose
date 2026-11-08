@@ -7,6 +7,8 @@ export default defineConfig({
 	format: "esm",
 	dts: true,
 	clean: true,
+	minify: true,
+	banner: '"use client";',
 	publint: true,
 	attw: { profile: "esm-only", level: "error" },
 });

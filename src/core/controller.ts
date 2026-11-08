@@ -1,4 +1,5 @@
-import { pageBox } from "./geometry";
+import type { Flight } from "./flight";
+import { type Box, pageBox } from "./geometry";
 import type { Morph } from "./morph";
 
 // The open and close sequence, separate from any framework. Elements are read
@@ -23,11 +24,34 @@ export interface ControllerOptions {
 	/** Gets focus on open. */
 	initialFocus?: () => HTMLElement | null;
 	onPhase?: (phase: Phase) => void;
+	/** Set false if something else handles Escape and outside presses. */
+	dismiss?: false;
+	/** Puts the content in its resting place, just before it's measured. */
+	layout?: () => void;
+	/**
+	 * Shared elements that travel on their own, read each time it opens from
+	 * closed. With any of these the surface stays put and only fades.
+	 */
+	flights?: () => Flight[];
+}
+
+/** Runs `then` once it has been called `count` times. */
+function latch(count: number, then: () => void): () => void {
+	let left = count;
+	return () => {
+		if (--left === 0) then();
+	};
+}
+
+/** Slightly smaller and on the same center, for fading out with nowhere to go. */
+function shrunk({ x, y, w, h, r }: Box): Box {
+	return { x: x + w * 0.05, y: y + h * 0.05, w: w * 0.9, h: h * 0.9, r };
 }
 
 export class Controller {
 	phase: Phase = "closed";
 	private options: ControllerOptions;
+	private flying: Flight[] = [];
 
 	constructor(options: ControllerOptions) {
 		this.options = options;
@@ -35,22 +59,28 @@ export class Controller {
 
 	open(): void {
 		if (this.phase === "opening" || this.phase === "open") return;
-		const { morph, source, commit, initialFocus } = this.options;
+		const { morph, source, commit, initialFocus, layout, flights } =
+			this.options;
 		const m = morph();
 		if (!m) return;
 
 		const wasClosed = this.phase === "closed";
+		if (wasClosed) this.flying = flights?.() ?? [];
+		const flown = this.flying.length > 0;
 		const shared = source !== undefined;
-		const origin = shared && wasClosed ? source() : null;
+		const origin = shared && wasClosed && !flown ? source() : null;
 		const from = origin ? pageBox(origin) : m.now();
 		m.release();
 		if (!shared || wasClosed) commit(true);
 		if (wasClosed) this.listen();
+		layout?.();
 
 		// Measuring flushes layout, which gives CSS fades a state to start from.
 		const to = m.measure();
 		this.set("opening");
-		m.go(from, to, () => this.set("open"));
+		const done = latch(1 + this.flying.length, () => this.set("open"));
+		for (const f of this.flying) f.fly(true, done);
+		m.go(wasClosed && flown ? to : from, to, done);
 		initialFocus?.()?.focus({ preventScroll: true });
 	}
 
@@ -62,9 +92,15 @@ export class Controller {
 
 		this.set("closing");
 		if (source) {
+			const done = latch(1 + this.flying.length, () => this.land());
+			for (const f of this.flying) f.fly(false, done);
 			const origin = source();
-			if (origin) {
-				m.to(pageBox(origin), () => this.land());
+			if (this.flying.length) {
+				m.to(m.now(), done);
+			} else if (origin) {
+				m.to(pageBox(origin), done);
+			} else if (m.options.mode === "surface") {
+				m.to(shrunk(m.now()), done);
 			} else {
 				// Nowhere to fly back to.
 				m.destroy();
@@ -79,13 +115,35 @@ export class Controller {
 		m.go(from, m.measure(), () => this.settleClosed());
 	}
 
+	/** Starts out open, with no motion. */
+	settle(): void {
+		if (this.phase !== "closed") return;
+		this.flying = this.options.flights?.() ?? [];
+		for (const f of this.flying) f.settle();
+		this.listen();
+		this.set("open");
+	}
+
+	/** Drops back to closed at once, without animating or moving focus. */
+	reset(): void {
+		this.destroy();
+		if (this.phase !== "closed") this.set("closed");
+	}
+
 	/** Removes the listeners. The morph belongs to whoever created it. */
 	destroy(): void {
 		this.unlisten();
+		this.dropFlights();
+	}
+
+	private dropFlights(): void {
+		for (const f of this.flying) f.destroy();
+		this.flying = [];
 	}
 
 	private land(): void {
 		this.options.commit(false);
+		this.dropFlights();
 		this.restoreFocus();
 		this.settleClosed();
 	}
@@ -122,6 +180,7 @@ export class Controller {
 	};
 
 	private listen(): void {
+		if (this.options.dismiss === false) return;
 		document.addEventListener("keydown", this.onKeyDown);
 		document.addEventListener("pointerdown", this.onPointerDown);
 	}

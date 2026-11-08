@@ -24,6 +24,7 @@ import {
 	morph,
 	type Phase,
 } from "../src/core";
+import { ComponentDemos } from "./Components";
 
 function useMorph<T extends HTMLElement>(
 	options: () => MorphOptions = () => ({}),
@@ -776,6 +777,7 @@ function App() {
 				<CornerCorrection />
 				<Interruption />
 			</main>
+			<ComponentDemos />
 		</>
 	);
 }
