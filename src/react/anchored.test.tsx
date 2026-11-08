@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { act } from "react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+import { Morph } from "../core";
 import { Eclose } from "./eclose";
 import { click, dialog, render, resized, settle, trigger } from "./test-utils";
 
@@ -82,11 +83,14 @@ describe("anchored placement", () => {
 		click(trigger());
 		await settle();
 		click(trigger());
+		const retarget = vi.spyOn(Morph.prototype, "retarget");
 		triggerRect.left = 400;
 		act(() => {
 			dispatchEvent(new Event("resize"));
 		});
 		triggerRect.left = 100;
+		expect(retarget.mock.calls[0]?.[0]).toMatchObject({ x: 400 });
+		retarget.mockRestore();
 		await settle();
 		expect(dialog()).toBeNull();
 	});

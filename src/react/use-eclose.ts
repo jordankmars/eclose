@@ -303,6 +303,42 @@ export function usePresence(context: EcloseContext): void {
 		};
 	}, [controller, refs]);
 
+	// Runs for as long as the content is mounted, so a close keeps following too.
+	useIsoLayoutEffect(() => {
+		// Something moved underneath: at rest it just gets placed again, and a
+		// morph in the air bends toward wherever it should now end up.
+		const follow = () => {
+			const morph = refs.morph;
+			const { trigger } = refs;
+			if (!morph) return;
+			if (controller.phase === "closing") {
+				if (trigger?.isConnected && !refs.flown) {
+					morph.retarget(pageBox(trigger));
+				}
+			} else if (morph.running) {
+				morph.release();
+				placeContent(refs, live.current);
+				morph.retarget();
+			} else if (!morph.held) {
+				placeContent(refs, live.current);
+			}
+		};
+		const stopWatching = watch(() => refs.trigger, follow);
+
+		// The surface's own size is being animated, so its children are what show
+		// a real change in content height. Every observer reports once at the start.
+		let reported = false;
+		const resizes = new ResizeObserver(() => {
+			if (reported) follow();
+			reported = true;
+		});
+		for (const child of refs.inner?.children ?? []) resizes.observe(child);
+		return () => {
+			stopWatching();
+			resizes.disconnect();
+		};
+	}, [controller, refs, live]);
+
 	useIsoLayoutEffect(() => {
 		if (!open) {
 			settleNext.current = false;
@@ -349,36 +385,6 @@ export function usePresence(context: EcloseContext): void {
 		const release = modal
 			? [lockScroll(() => refs.surface), inertOthers(portal)]
 			: [];
-
-		// Something moved underneath: at rest it just gets placed again, and a
-		// morph in the air bends toward wherever it should now end up.
-		const follow = () => {
-			const morph = refs.morph;
-			const { trigger } = refs;
-			if (!morph) return;
-			if (controller.phase === "closing") {
-				if (trigger?.isConnected && !refs.flown) {
-					morph.retarget(pageBox(trigger));
-				}
-			} else if (morph.running) {
-				morph.release();
-				placeContent(refs, live.current);
-				morph.retarget();
-			} else if (!morph.held) {
-				placeContent(refs, live.current);
-			}
-		};
-		release.push(watch(() => refs.trigger, follow));
-
-		// The surface's own size is being animated, so its children are what show
-		// a real change in content height. Every observer reports once at the start.
-		let reported = false;
-		const resizes = new ResizeObserver(() => {
-			if (reported) follow();
-			reported = true;
-		});
-		for (const child of refs.inner?.children ?? []) resizes.observe(child);
-		release.push(() => resizes.disconnect());
 
 		if (settleNext.current) {
 			placeContent(refs, live.current);
