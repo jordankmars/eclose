@@ -16,7 +16,7 @@ function prefersReducedMotion(): boolean {
 }
 
 export const config: MotionConfig = {
-	duration: 0.5,
+	duration: 0.32,
 	bounce: 0,
 	speed: 1,
 	reduced: prefersReducedMotion(),
