@@ -70,7 +70,7 @@ export class Morph implements Animated {
 
 	/** Where the element appears right now, mid-flight or at rest. */
 	now(): Box {
-		return this.running ? this.current() : pageBox(this.el);
+		return this.running || this.hold ? this.current() : pageBox(this.el);
 	}
 
 	/** Records the element's untransformed layout box and returns it. */
@@ -81,6 +81,7 @@ export class Morph implements Animated {
 
 	/** Clears every inline style the morph wrote, so layout can be read cleanly. */
 	release(): void {
+		this.hold = false;
 		const st = this.el.style;
 		st.transform = "";
 		st.transformOrigin = "";
@@ -136,7 +137,7 @@ export class Morph implements Animated {
 		this.release();
 		this.measure();
 		this.go(from, target, done);
-		this.hold = true;
+		this.hold = this.running;
 	}
 
 	step(dt: number): void {
