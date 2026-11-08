@@ -725,7 +725,7 @@ function Interruption() {
 const snappy = { duration: 0.32, bounce: 0 };
 const SPRINGS = {
 	snappy,
-	bouncy: { ...snappy, bounce: 0.32 },
+	bouncy: { duration: snappy.duration * 1.3, bounce: 0.32 },
 };
 
 function Controls() {

@@ -7,7 +7,7 @@ import {
 } from "./spring";
 
 const snappy = springConstants({ duration: 0.32, bounce: 0 });
-const bouncy = springConstants({ duration: 0.32, bounce: 0.32 });
+const bouncy = springConstants({ duration: 0.416, bounce: 0.32 });
 
 function run(s: SpringState, k: typeof snappy, seconds: number, fps = 60) {
 	let peak = s.x;
