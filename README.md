@@ -71,6 +71,8 @@ On touch, dragging down dismisses. Inside a scroller, it only takes over from th
 
 - Don't put a CSS `transition` on `Eclose.Content`. It fights the per-frame updates.
 - Portals sit at `z-index: 9999`. Set `--eclose-z` to change that.
+- A trigger's position is followed through scrolling and resizing, but not through a CSS transform animating on its parent mid-morph. The browser doesn't report those.
+- Don't pass a `container` that's scaled. Translated is fine.
 - With reduced motion, everything becomes a fade.
 
 ## Adapters
