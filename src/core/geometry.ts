@@ -36,6 +36,12 @@ export interface Projection {
 	ty: number;
 	sx: number;
 	sy: number;
+	/**
+	 * Border radius to set on the element, per axis, so that after scaling its
+	 * corners are drawn at `box.r`. Without this a circle squashes into an oval.
+	 */
+	rx: number;
+	ry: number;
 }
 
 /**
@@ -45,10 +51,15 @@ export interface Projection {
 export function projection(layout: Rect, box: Box): Projection {
 	const w = Math.max(box.w, 1);
 	const h = Math.max(box.h, 1);
+	const r = Math.max(0, Math.min(box.r, w / 2, h / 2));
+	const sx = w / (layout.w || 1);
+	const sy = h / (layout.h || 1);
 	return {
 		tx: box.x - layout.x,
 		ty: box.y - layout.y,
-		sx: w / (layout.w || 1),
-		sy: h / (layout.h || 1),
+		sx,
+		sy,
+		rx: r / sx,
+		ry: r / sy,
 	};
 }

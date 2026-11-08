@@ -28,6 +28,8 @@ export interface MorphOptions {
 	 * motion bends toward the new target. Off restarts from rest. Default true.
 	 */
 	handoff?: boolean;
+	/** Spring the corner radius and undo its distortion from scaling. Default true. */
+	radius?: boolean;
 	/** Called after every applied frame. */
 	onFrame?: (morph: Morph) => void;
 }
@@ -69,6 +71,7 @@ export class Morph implements Animated {
 		const st = this.el.style;
 		st.transform = "";
 		st.transformOrigin = "";
+		if (this.options.radius !== false) st.borderRadius = "";
 	}
 
 	/**
@@ -122,9 +125,10 @@ export class Morph implements Animated {
 
 	apply(): void {
 		const st = this.el.style;
-		const { tx, ty, sx, sy } = projection(this.layout, this.current());
+		const { tx, ty, sx, sy, rx, ry } = projection(this.layout, this.current());
 		st.transformOrigin = "0 0";
 		st.transform = `translate(${tx}px, ${ty}px) scale(${sx}, ${sy})`;
+		if (this.options.radius !== false) st.borderRadius = `${rx}px / ${ry}px`;
 		this.options.onFrame?.(this);
 	}
 }
