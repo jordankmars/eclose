@@ -30,6 +30,11 @@ export interface MorphOptions {
 	handoff?: boolean;
 	/** Spring the corner radius and undo its distortion from scaling. Default true. */
 	radius?: boolean;
+	/**
+	 * An inner wrapper that gets the inverse scale, so the content keeps its size
+	 * while the box around it grows or shrinks. Without it, text stretches.
+	 */
+	counter?: HTMLElement | null;
 	/** Called after every applied frame. */
 	onFrame?: (morph: Morph) => void;
 }
@@ -72,6 +77,11 @@ export class Morph implements Animated {
 		st.transform = "";
 		st.transformOrigin = "";
 		if (this.options.radius !== false) st.borderRadius = "";
+		const counter = this.options.counter?.style;
+		if (counter) {
+			counter.transform = "";
+			counter.transformOrigin = "";
+		}
 	}
 
 	/**
@@ -129,6 +139,11 @@ export class Morph implements Animated {
 		st.transformOrigin = "0 0";
 		st.transform = `translate(${tx}px, ${ty}px) scale(${sx}, ${sy})`;
 		if (this.options.radius !== false) st.borderRadius = `${rx}px / ${ry}px`;
+		const counter = this.options.counter?.style;
+		if (counter) {
+			counter.transformOrigin = "0 0";
+			counter.transform = `scale(${1 / sx}, ${1 / sy})`;
+		}
 		this.options.onFrame?.(this);
 	}
 }
