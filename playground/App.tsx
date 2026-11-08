@@ -193,6 +193,161 @@ function Popover() {
 	);
 }
 
+// ---------- Expanding pill ----------
+
+type PillState = "idle" | "timer" | "music";
+
+function Pill() {
+	const [state, setState] = useState<PillState>("idle");
+	const [pill, pillM] = useMorph<HTMLDivElement>(() => ({ mode: "size" }));
+
+	return (
+		<section className="demo">
+			<div className="demo-h">
+				<h2>Expanding pill</h2>
+				<p>
+					A status pill that grows into a live activity. Try the Bouncy spring
+					here.
+				</p>
+			</div>
+			<div className="stage phone">
+				<div className="status">
+					<span>9:41</span>
+					<i>5G ▮▮▮</i>
+				</div>
+				<div className="island" ref={pill} data-state={state}>
+					<div className="is-c is-timer">
+						<svg
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							strokeWidth="2.2"
+							strokeLinecap="round"
+							aria-hidden="true"
+						>
+							<circle cx="12" cy="13" r="8" />
+							<path d="M12 9v4l2 2M9 2h6" />
+						</svg>
+						<span>04:59</span>
+					</div>
+					<div className="is-c is-music">
+						<div className="is-art" />
+						<div className="is-meta">
+							<b>Low Tide</b>
+							<span>Harbor Lights</span>
+						</div>
+						<div className="is-bar">
+							<span>1:12</span>
+							<div />
+							<span>3:08</span>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div className="demo-f">
+				<span className="how">
+					size mode · content clipped, never stretched
+				</span>
+				<Chips
+					label="Pill state"
+					options={[
+						["idle", "Idle"],
+						["timer", "Timer"],
+						["music", "Music"],
+					]}
+					value={state}
+					onChange={(v) => morphState([pillM.current], () => setState(v))}
+				/>
+			</div>
+		</section>
+	);
+}
+
+// ---------- Search field ----------
+
+function Search() {
+	const [open, setOpen] = useState(false);
+	const [query, setQuery] = useState("");
+	const live = useRef({ open, query });
+	live.current = { open, query };
+	const input = useRef<HTMLInputElement>(null);
+	const [search, searchM] = useMorph<HTMLDivElement>(() => ({ mode: "size" }));
+
+	const setSearch = useCallback(
+		(next: boolean) => {
+			if (live.current.open === next) return;
+			morphState([searchM.current], () => setOpen(next));
+			if (next) input.current?.focus({ preventScroll: true });
+			else input.current?.blur();
+		},
+		[searchM],
+	);
+
+	// Leaving an empty field closes it. One with a query stays open.
+	useEffect(() => {
+		const onDown = (e: globalThis.PointerEvent) => {
+			if (!search.current?.contains(e.target as Node) && !live.current.query) {
+				setSearch(false);
+			}
+		};
+		const onKey = (e: KeyboardEvent) => {
+			if (e.key === "Escape" && !live.current.query) setSearch(false);
+		};
+		document.addEventListener("pointerdown", onDown);
+		document.addEventListener("keydown", onKey);
+		return () => {
+			document.removeEventListener("pointerdown", onDown);
+			document.removeEventListener("keydown", onKey);
+		};
+	}, [search, setSearch]);
+
+	return (
+		<section className="demo">
+			<div className="demo-h">
+				<h2>Search field</h2>
+				<p>
+					An icon button that widens into a field and closes again when you
+					leave it empty.
+				</p>
+			</div>
+			<div className="stage">
+				<div className={open ? "search open" : "search"} ref={search}>
+					<button
+						type="button"
+						className="s-icon"
+						aria-label="Search"
+						onClick={() => setSearch(!open || !!query)}
+					>
+						<svg
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							strokeWidth="2.2"
+							strokeLinecap="round"
+							aria-hidden="true"
+						>
+							<circle cx="11" cy="11" r="7" />
+							<path d="m20 20-3.5-3.5" />
+						</svg>
+					</button>
+					<input
+						ref={input}
+						type="text"
+						placeholder="Search files"
+						aria-label="Search files"
+						tabIndex={open ? 0 : -1}
+						value={query}
+						onChange={(e) => setQuery(e.target.value)}
+					/>
+				</div>
+			</div>
+			<div className="demo-f">
+				<span className="how">size mode · width only</span>
+			</div>
+		</section>
+	);
+}
+
 // ---------- Corner correction ----------
 
 function Avatar({
@@ -410,6 +565,8 @@ function App() {
 			</header>
 			<main className="wrap grid">
 				<Popover />
+				<Pill />
+				<Search />
 				<CornerCorrection />
 				<Interruption />
 			</main>

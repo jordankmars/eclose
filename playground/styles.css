@@ -372,3 +372,165 @@ p {
 	font-size: 11px;
 	opacity: 0.55;
 }
+
+/* Expanding pill */
+.phone {
+	align-items: flex-start;
+}
+.status {
+	position: absolute;
+	top: 18px;
+	left: 26px;
+	right: 26px;
+	display: flex;
+	justify-content: space-between;
+	font-weight: 600;
+	font-size: 13px;
+	font-variant-numeric: tabular-nums;
+}
+.status i {
+	font-style: normal;
+	font-family: var(--mono);
+	font-size: 11px;
+	color: var(--muted);
+}
+.island {
+	position: relative;
+	width: 112px;
+	height: 32px;
+	border-radius: 16px;
+	background: var(--island);
+	color: #f4f4f6;
+	overflow: hidden;
+	max-width: 100%;
+	margin-top: 4px;
+}
+.island[data-state="timer"] {
+	width: 210px;
+}
+.island[data-state="music"] {
+	width: 320px;
+	height: 140px;
+	border-radius: 36px;
+}
+.is-c {
+	position: absolute;
+	display: none;
+	animation: fade 0.25s 0.08s both;
+}
+.is-timer {
+	inset: 0;
+	align-items: center;
+	justify-content: space-between;
+	padding: 0 12px;
+	font-family: var(--mono);
+	font-size: 13px;
+	color: #ffa64d;
+}
+.is-timer svg {
+	width: 16px;
+	height: 16px;
+}
+.is-music {
+	left: 50%;
+	top: 0;
+	width: 320px;
+	height: 140px;
+	transform: translateX(-50%);
+	padding: 18px 20px;
+	grid-template-columns: 52px 1fr;
+	grid-template-rows: auto 1fr auto;
+	column-gap: 12px;
+}
+.is-art {
+	width: 52px;
+	height: 52px;
+	border-radius: 12px;
+	background: linear-gradient(160deg, #0f4c5c, #5fa8a0 55%, #e3d9b8);
+}
+.is-meta b {
+	display: block;
+	font-weight: 500;
+}
+.is-meta span {
+	font-size: 12px;
+	color: #a1a1aa;
+}
+.is-bar {
+	grid-column: 1 / -1;
+	align-self: end;
+	display: grid;
+	grid-template-columns: auto 1fr auto;
+	gap: 8px;
+	align-items: center;
+	font-family: var(--mono);
+	font-size: 10.5px;
+	color: #a1a1aa;
+}
+.is-bar div {
+	height: 4px;
+	border-radius: 2px;
+	background: #3f3f46;
+	overflow: hidden;
+}
+.is-bar div::after {
+	content: "";
+	display: block;
+	width: 38%;
+	height: 100%;
+	background: #f4f4f6;
+}
+.island[data-state="timer"] .is-timer {
+	display: flex;
+}
+.island[data-state="music"] .is-music {
+	display: grid;
+}
+
+/* Search field */
+.search {
+	position: relative;
+	width: 40px;
+	height: 40px;
+	border-radius: 20px;
+	background: var(--surface);
+	overflow: hidden;
+}
+.search.open {
+	width: 270px;
+	max-width: 100%;
+}
+.s-icon {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 40px;
+	height: 40px;
+	display: grid;
+	place-items: center;
+	border-radius: 20px;
+}
+.s-icon svg {
+	width: 17px;
+	height: 17px;
+}
+.search input {
+	position: absolute;
+	left: 38px;
+	top: 0;
+	height: 40px;
+	width: 220px;
+	border: 0;
+	background: transparent;
+	font: inherit;
+	color: var(--fg);
+	outline: none;
+	visibility: hidden;
+}
+.search.open input {
+	visibility: visible;
+	animation: fade 0.2s 0.05s both;
+}
+.search input::placeholder {
+	color: var(--muted);
+}
