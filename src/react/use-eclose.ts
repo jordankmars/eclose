@@ -14,6 +14,7 @@ import {
 	Controller,
 	Flight,
 	inertOthers,
+	isTop,
 	type Layer,
 	lockScroll,
 	Morph,
@@ -22,6 +23,7 @@ import {
 	pageRect,
 	place,
 	pushLayer,
+	swipe,
 	tabEdge,
 	viewport,
 	watch,
@@ -53,6 +55,8 @@ export interface RootOptions {
 	placement?: "anchored" | "centered";
 	/** Trap focus, make the page inert and lock scroll. Centered defaults to on. */
 	modal?: boolean;
+	/** Swipe down to dismiss, on touch. Default true. */
+	swipe?: boolean;
 	/** Render into this element instead of the document body. */
 	container?: HTMLElement | null;
 }
@@ -65,6 +69,7 @@ interface Refs {
 	overlay: HTMLElement | null;
 	flightLayer: HTMLElement | null;
 	morph: Morph | null;
+	layer: Layer | null;
 	/** Shared elements are travelling, so the surface itself stays put. */
 	flown: boolean;
 }
@@ -88,6 +93,7 @@ export interface EcloseContext {
 	descriptionId: string;
 	modal: boolean;
 	centered: boolean;
+	swipeable: boolean;
 	shared: Map<string, SharedPair>;
 	live: RefObject<RootOptions>;
 	/** Open on the first render, so it should appear without motion. */
@@ -156,6 +162,7 @@ export function useRoot(options: RootOptions): EcloseContext {
 		overlay: null,
 		flightLayer: null,
 		morph: null,
+		layer: null,
 		flown: false,
 	}).current;
 	const shared = useRef(new Map<string, SharedPair>()).current;
@@ -231,6 +238,7 @@ export function useRoot(options: RootOptions): EcloseContext {
 		descriptionId: `${contentId}d`,
 		modal: isModal(options),
 		centered: options.placement === "centered",
+		swipeable: options.swipe !== false,
 		shared,
 		live,
 		settleNext,
@@ -249,7 +257,19 @@ export function usePresence(context: EcloseContext): void {
 		live,
 		titleId,
 		descriptionId,
+		swipeable,
 	} = context;
+
+	useIsoLayoutEffect(() => {
+		const surface = refs.surface;
+		if (!surface || !swipeable) return;
+		return swipe(surface, {
+			morph: () => refs.morph,
+			enabled: () =>
+				controller.phase === "open" && !!refs.layer && isTop(refs.layer),
+			dismiss: () => request(false),
+		});
+	}, [refs, controller, request, swipeable]);
 
 	useIsoLayoutEffect(() => {
 		const { surface, inner } = refs;
@@ -323,6 +343,7 @@ export function usePresence(context: EcloseContext): void {
 				else request(false);
 			},
 		};
+		refs.layer = layer;
 		const popLayer = pushLayer(layer);
 		const release = modal
 			? [lockScroll(() => refs.surface), inertOthers(portal)]
