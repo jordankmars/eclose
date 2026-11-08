@@ -10,7 +10,16 @@ import {
 	useState,
 	useSyncExternalStore,
 } from "react";
-import { Controller, Morph, type Phase } from "../core";
+import {
+	Controller,
+	inertOthers,
+	type Layer,
+	lockScroll,
+	Morph,
+	type Phase,
+	pushLayer,
+	tabEdge,
+} from "../core";
 
 // How React drives the core: the DOM always follows state, and a layout effect
 // starts the motion once it's there. That keeps flushSync out of it, and means
@@ -34,6 +43,10 @@ export interface RootOptions {
 	open?: boolean;
 	defaultOpen?: boolean;
 	onOpenChange?: (open: boolean) => void;
+	/** Where the content rests: on top of its trigger, or in the viewport center. */
+	placement?: "anchored" | "centered";
+	/** Trap focus, make the page inert and lock scroll. Centered defaults to on. */
+	modal?: boolean;
 	/** Render into this element instead of the document body. */
 	container?: HTMLElement | null;
 }
@@ -42,6 +55,7 @@ interface Refs {
 	trigger: HTMLElement | null;
 	surface: HTMLElement | null;
 	inner: HTMLElement | null;
+	overlay: HTMLElement | null;
 	morph: Morph | null;
 }
 
@@ -54,6 +68,10 @@ export interface EcloseContext {
 	refs: Refs;
 	portal: HTMLElement | null;
 	contentId: string;
+	titleId: string;
+	descriptionId: string;
+	modal: boolean;
+	live: RefObject<RootOptions>;
 	/** Open on the first render, so it should appear without motion. */
 	settleNext: RefObject<boolean>;
 }
@@ -69,6 +87,10 @@ export function useEclose(): EcloseContext {
 	const context = useContext(Context);
 	if (!context) throw new Error("eclose: parts must be inside Eclose.Root");
 	return context;
+}
+
+function isModal({ modal, placement }: RootOptions): boolean {
+	return modal ?? placement === "centered";
 }
 
 function createPortalRoot(): HTMLElement {
@@ -96,6 +118,7 @@ export function useRoot(options: RootOptions): EcloseContext {
 		trigger: null,
 		surface: null,
 		inner: null,
+		overlay: null,
 		morph: null,
 	}).current;
 
@@ -111,7 +134,7 @@ export function useRoot(options: RootOptions): EcloseContext {
 		dismiss: false,
 		trigger: () => refs.trigger,
 		surface: () => refs.surface,
-		source: () => refs.trigger,
+		source: () => (refs.trigger?.isConnected ? refs.trigger : null),
 		initialFocus: () => {
 			const surface = refs.surface;
 			if (!surface || surface.contains(document.activeElement)) return null;
@@ -120,6 +143,7 @@ export function useRoot(options: RootOptions): EcloseContext {
 		onPhase: (next) => {
 			setPhase(next);
 			refs.surface?.toggleAttribute("inert", next === "closing");
+			if (next === "open" && refs.overlay) refs.overlay.style.opacity = "";
 			if (next === "closed" && refs.trigger) refs.trigger.style.opacity = "";
 		},
 	});
@@ -148,13 +172,27 @@ export function useRoot(options: RootOptions): EcloseContext {
 		refs,
 		portal,
 		contentId,
+		titleId: `${contentId}t`,
+		descriptionId: `${contentId}d`,
+		modal: isModal(options),
+		live,
 		settleNext,
 	};
 }
 
 /** Lives as long as the content is mounted, and runs its motion. */
 export function usePresence(context: EcloseContext): void {
-	const { open, controller, refs, settleNext } = context;
+	const {
+		open,
+		controller,
+		refs,
+		settleNext,
+		portal,
+		request,
+		live,
+		titleId,
+		descriptionId,
+	} = context;
 
 	useIsoLayoutEffect(() => {
 		const { surface, inner } = refs;
@@ -169,7 +207,10 @@ export function usePresence(context: EcloseContext): void {
 			mode: "surface",
 			inner,
 			fade: true,
-			onFrame: (m) => hideTrigger(m.progress),
+			onFrame: (m) => {
+				hideTrigger(m.progress);
+				if (refs.overlay) refs.overlay.style.opacity = `${m.progress / 100}`;
+			},
 		});
 		refs.morph = morph;
 		return () => {
@@ -180,16 +221,80 @@ export function usePresence(context: EcloseContext): void {
 	}, [controller, refs]);
 
 	useIsoLayoutEffect(() => {
+		// Only take focus back if nothing else has claimed it in the meantime.
+		const returnFocus = () => {
+			const active = document.activeElement;
+			if (
+				!active ||
+				active === document.body ||
+				refs.surface?.contains(active)
+			) {
+				refs.trigger?.focus({ preventScroll: true });
+			}
+		};
+
 		if (!open) {
 			settleNext.current = false;
+			// Has to happen here. React puts focus back after running cleanups,
+			// so anything moved there is undone while the element still exists.
+			returnFocus();
 			controller.close();
 			return;
 		}
+		const surface = refs.surface;
+		if (!surface || !portal) return;
+
+		for (const [attribute, id] of [
+			["aria-labelledby", titleId],
+			["aria-describedby", descriptionId],
+		]) {
+			if (document.getElementById(id)) surface.setAttribute(attribute, id);
+		}
+
+		const modal = isModal(live.current);
+		const layer: Layer = {
+			surface: () => refs.surface,
+			trigger: () => refs.trigger,
+			modal,
+			dismiss: () => request(false),
+			tab: (e) => {
+				const edge = tabEdge(e, surface);
+				if (!edge) return;
+				e.preventDefault();
+				// Leaving a popover closes it, and focus goes back to its trigger.
+				if (modal) edge.focus();
+				else request(false);
+			},
+		};
+		const popLayer = pushLayer(layer);
+		const release = modal
+			? [lockScroll(() => refs.surface), inertOthers(portal)]
+			: [];
+
 		if (settleNext.current) {
 			controller.settle();
 			if (refs.trigger) refs.trigger.style.opacity = "0";
+			(surface.querySelector<HTMLElement>("[autofocus]") ?? surface).focus({
+				preventScroll: true,
+			});
 		} else {
 			controller.open();
 		}
-	}, [open, controller, refs, settleNext]);
+
+		return () => {
+			popLayer();
+			for (const undo of release) undo();
+			returnFocus();
+		};
+	}, [
+		open,
+		controller,
+		refs,
+		settleNext,
+		portal,
+		request,
+		live,
+		titleId,
+		descriptionId,
+	]);
 }

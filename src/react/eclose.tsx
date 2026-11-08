@@ -112,9 +112,11 @@ const Trigger = forwardRef<HTMLButtonElement, TriggerProps>(function Trigger(
 			onClick: handleClick,
 		},
 		mergeRefs<HTMLElement | null>(ref as Ref<HTMLElement | null>, (el) => {
+			// Inline refs detach on every render, so a null here doesn't mean it's gone.
+			if (!el) return;
 			refs.trigger = el;
 			// A replacement mounted while open shouldn't show through.
-			if (el && phase === "open") el.style.opacity = "0";
+			if (phase === "open") el.style.opacity = "0";
 		}) as Ref<never>,
 	);
 });
@@ -157,7 +159,7 @@ const Content = forwardRef<HTMLDivElement, ContentProps>(function Content(
 	ref,
 ) {
 	const context = useEclose();
-	const { present, portal, phase, refs, contentId } = context;
+	const { present, portal, phase, refs, contentId, modal } = context;
 	if (!present || !portal) return null;
 	return createPortal(
 		<ParentPortalProvider value={portal}>
@@ -174,17 +176,18 @@ const Content = forwardRef<HTMLDivElement, ContentProps>(function Content(
 				<div
 					id={contentId}
 					role="dialog"
+					aria-modal={modal || undefined}
 					tabIndex={-1}
 					data-state={phase}
 					{...props}
 					ref={mergeRefs<HTMLDivElement | null>(ref, (el) => {
-						refs.surface = el;
+						if (el) refs.surface = el;
 					})}
 					style={{ outline: "none", pointerEvents: "auto", ...style }}
 				>
 					<div
 						ref={(el) => {
-							refs.inner = el;
+							if (el) refs.inner = el;
 						}}
 						style={{ display: "contents" }}
 					>
@@ -198,4 +201,50 @@ const Content = forwardRef<HTMLDivElement, ContentProps>(function Content(
 	);
 });
 
-export const Eclose = { Root, Trigger, Content, Close };
+export type OverlayProps = ComponentPropsWithoutRef<"div">;
+
+const Overlay = forwardRef<HTMLDivElement, OverlayProps>(function Overlay(
+	{ style, ...props },
+	ref,
+) {
+	const { present, portal, phase, refs } = useEclose();
+	if (!present || !portal) return null;
+	return createPortal(
+		<div
+			aria-hidden
+			data-state={phase}
+			{...props}
+			ref={mergeRefs<HTMLDivElement | null>(ref, (el) => {
+				if (el) refs.overlay = el;
+			})}
+			style={{ position: "fixed", inset: 0, ...style }}
+		/>,
+		portal,
+	);
+});
+
+export type TitleProps = ComponentPropsWithoutRef<"h2">;
+
+const Title = forwardRef<HTMLHeadingElement, TitleProps>(
+	function Title(props, ref) {
+		return <h2 id={useEclose().titleId} {...props} ref={ref} />;
+	},
+);
+
+export type DescriptionProps = ComponentPropsWithoutRef<"p">;
+
+const Description = forwardRef<HTMLParagraphElement, DescriptionProps>(
+	function Description(props, ref) {
+		return <p id={useEclose().descriptionId} {...props} ref={ref} />;
+	},
+);
+
+export const Eclose = {
+	Root,
+	Trigger,
+	Content,
+	Close,
+	Overlay,
+	Title,
+	Description,
+};
