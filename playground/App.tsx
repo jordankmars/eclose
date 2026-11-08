@@ -17,11 +17,12 @@ import {
 import { flushSync } from "react-dom";
 import { createRoot } from "react-dom/client";
 import {
+	Controller,
 	configure,
 	Morph,
 	type MorphOptions,
 	morph,
-	pageBox,
+	type Phase,
 } from "../src/core";
 
 function useMorph<T extends HTMLElement>(
@@ -102,53 +103,41 @@ const ALBUMS = [
 ];
 
 function CardToDetail() {
-	// `open` is which album the overlay shows; `shown` drives the fade, and
-	// lags behind `open` so the overlay can play its exit before it hides.
 	const [open, setOpen] = useState<number | null>(null);
-	const [shown, setShown] = useState(false);
-	const closing = useRef(false);
+	const [phase, setPhase] = useState<Phase>("closed");
+	const selected = useRef(0);
+	const controller = useRef<Controller>(null);
 	const cards = useRef<(HTMLButtonElement | null)[]>([]);
 	const arts = useRef<(HTMLDivElement | null)[]>([]);
-	const overlay = useRef<HTMLDivElement>(null);
+	const surface = useRef<HTMLDivElement>(null);
 	const closeButton = useRef<HTMLButtonElement>(null);
 	const [hero, heroM] = useMorph<HTMLDivElement>();
 
+	useEffect(() => {
+		const c = new Controller({
+			morph: () => heroM.current,
+			commit: (next) =>
+				flushSync(() => setOpen(next ? selected.current : null)),
+			source: () => arts.current[selected.current],
+			trigger: () => cards.current[selected.current],
+			surface: () => surface.current,
+			initialFocus: () => closeButton.current,
+			onPhase: (p) => flushSync(() => setPhase(p)),
+		});
+		controller.current = c;
+		return () => c.destroy();
+	}, [heroM]);
+
+	// The card that's on its way home can be caught. The others wait for it.
 	function openDetail(i: number) {
-		const art = arts.current[i];
-		const m = heroM.current;
-		if (open !== null || !art || !m) return;
-		const from = pageBox(art);
-		flushSync(() => setOpen(i));
-		// Commit the hidden state before fading in, or there's nothing to fade from.
-		void overlay.current?.offsetWidth;
-		flushSync(() => setShown(true));
-		m.release();
-		m.go(from, m.measure());
-		closeButton.current?.focus({ preventScroll: true });
+		const c = controller.current;
+		if (!c) return;
+		if (c.phase === "closed") selected.current = i;
+		else if (i !== selected.current) return;
+		c.open();
 	}
 
-	const closeDetail = useCallback(() => {
-		if (open === null || closing.current) return;
-		const art = arts.current[open];
-		const m = heroM.current;
-		if (!art || !m) return;
-		closing.current = true;
-		setShown(false);
-		m.to(pageBox(art), () => {
-			closing.current = false;
-			setOpen(null);
-			cards.current[open]?.focus({ preventScroll: true });
-		});
-	}, [open, heroM]);
-
-	useEffect(() => {
-		const onKey = (e: KeyboardEvent) => {
-			if (e.key === "Escape") closeDetail();
-		};
-		document.addEventListener("keydown", onKey);
-		return () => document.removeEventListener("keydown", onKey);
-	}, [closeDetail]);
-
+	const shown = phase === "opening" || phase === "open";
 	const album = open === null ? null : ALBUMS[open];
 
 	return (
@@ -199,14 +188,11 @@ function CardToDetail() {
 				</span>
 			</div>
 
-			<div
-				className={shown ? "ov in" : "ov"}
-				ref={overlay}
-				hidden={open === null}
-			>
-				<div className="ov-scrim" onPointerDown={closeDetail} />
+			<div className={shown ? "ov in" : "ov"} hidden={open === null}>
+				<div className="ov-scrim" />
 				<div
 					className="detail"
+					ref={surface}
 					role="dialog"
 					aria-modal="true"
 					aria-labelledby="d-title"
@@ -225,7 +211,7 @@ function CardToDetail() {
 								type="button"
 								className="btn"
 								ref={closeButton}
-								onClick={closeDetail}
+								onClick={() => controller.current?.close()}
 							>
 								Close
 							</button>
