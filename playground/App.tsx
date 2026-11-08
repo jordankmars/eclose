@@ -9,6 +9,7 @@ import {
 	type PointerEvent,
 	type RefObject,
 	StrictMode,
+	useCallback,
 	useEffect,
 	useRef,
 	useState,
@@ -65,6 +66,130 @@ function Chips<T extends string>({
 				</button>
 			))}
 		</fieldset>
+	);
+}
+
+// ---------- Button to popover ----------
+
+function Popover() {
+	const [open, setOpen] = useState(false);
+	const openRef = useRef(open);
+	openRef.current = open;
+	const inner = useRef<HTMLDivElement>(null);
+	const label = useRef<HTMLButtonElement>(null);
+	const firstItem = useRef<HTMLButtonElement>(null);
+	const [pop, popM] = useMorph<HTMLDivElement>(() => ({
+		counter: inner.current,
+	}));
+
+	const setPop = useCallback(
+		(next: boolean, returnFocus = false) => {
+			if (openRef.current === next) return;
+			morphState([popM.current], () => setOpen(next));
+			if (next) firstItem.current?.focus({ preventScroll: true });
+			else if (returnFocus) label.current?.focus({ preventScroll: true });
+		},
+		[popM],
+	);
+
+	useEffect(() => {
+		const onDown = (e: globalThis.PointerEvent) => {
+			if (!pop.current?.contains(e.target as Node)) setPop(false);
+		};
+		const onKey = (e: KeyboardEvent) => {
+			if (e.key === "Escape") setPop(false, true);
+		};
+		document.addEventListener("pointerdown", onDown);
+		document.addEventListener("keydown", onKey);
+		return () => {
+			document.removeEventListener("pointerdown", onDown);
+			document.removeEventListener("keydown", onKey);
+		};
+	}, [pop, setPop]);
+
+	return (
+		<section className="demo">
+			<div className="demo-h">
+				<h2>Button to popover</h2>
+				<p>
+					The trigger opens into its own menu, so the menu clearly comes from
+					it.
+				</p>
+			</div>
+			<div className="stage">
+				<div className={open ? "pop open" : "pop"} ref={pop}>
+					<div ref={inner}>
+						<button
+							type="button"
+							className="pop-label"
+							ref={label}
+							aria-expanded={open}
+							hidden={open}
+							onClick={() => setPop(true)}
+						>
+							<svg
+								width="15"
+								height="15"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								strokeWidth="2"
+								strokeLinecap="round"
+								strokeLinejoin="round"
+								aria-hidden="true"
+							>
+								<path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7" />
+								<path d="M12 3v13" />
+								<path d="m7 8 5-5 5 5" />
+							</svg>
+							Share
+						</button>
+						<div className="pop-panel" hidden={!open}>
+							<div className="pop-head">
+								<span>Share “Q3 roadmap”</span>
+								<button
+									type="button"
+									aria-label="Close"
+									onClick={() => setPop(false, true)}
+								>
+									<svg
+										width="12"
+										height="12"
+										viewBox="0 0 24 24"
+										fill="none"
+										stroke="currentColor"
+										strokeWidth="2.5"
+										strokeLinecap="round"
+										aria-hidden="true"
+									>
+										<path d="M6 6l12 12M18 6 6 18" />
+									</svg>
+								</button>
+							</div>
+							{["Copy link", "Send by email", "Post to #design"].map(
+								(item, i) => (
+									<button
+										type="button"
+										key={item}
+										className="pop-item"
+										ref={i === 0 ? firstItem : undefined}
+										onClick={() => setPop(false, true)}
+									>
+										{item}
+										{i === 0 && <kbd>⌘C</kbd>}
+									</button>
+								),
+							)}
+						</div>
+					</div>
+				</div>
+			</div>
+			<div className="demo-f">
+				<span className="how">
+					transform · counter-scaled content · crossfade
+				</span>
+			</div>
+		</section>
 	);
 }
 
@@ -284,6 +409,7 @@ function App() {
 				</p>
 			</header>
 			<main className="wrap grid">
+				<Popover />
 				<CornerCorrection />
 				<Interruption />
 			</main>
