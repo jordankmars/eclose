@@ -722,14 +722,14 @@ function Interruption() {
 
 // ---------- Controls ----------
 
+const snappy = { duration: 0.32, bounce: 0 };
 const SPRINGS = {
-	snappy: { duration: 0.32, bounce: 0 },
-	smooth: { duration: 0.5, bounce: 0 },
-	bouncy: { duration: 0.55, bounce: 0.32 },
+	snappy,
+	bouncy: { ...snappy, bounce: 0.32 },
 };
 
 function Controls() {
-	const [spring, setSpring] = useState<keyof typeof SPRINGS>("smooth");
+	const [spring, setSpring] = useState<keyof typeof SPRINGS>("snappy");
 	const [speed, setSpeed] = useState<"1" | "0.25">("1");
 	const [motion, setMotion] = useState<"full" | "reduced">(() =>
 		matchMedia("(prefers-reduced-motion: reduce)").matches ? "reduced" : "full",
@@ -751,7 +751,6 @@ function Controls() {
 						label="Spring"
 						options={[
 							["snappy", "Snappy"],
-							["smooth", "Smooth"],
 							["bouncy", "Bouncy"],
 						]}
 						value={spring}
