@@ -9,6 +9,7 @@ import {
 	type ReactElement,
 	type ReactNode,
 	type Ref,
+	type RefObject,
 	useContext,
 	useRef,
 } from "react";
@@ -157,7 +158,10 @@ const Close = forwardRef<HTMLButtonElement, CloseProps>(function Close(
 	);
 });
 
-export type ContentProps = ComponentPropsWithoutRef<"div">;
+export interface ContentProps extends ComponentPropsWithoutRef<"div"> {
+	/** Takes focus on opening, ahead of an `autoFocus` child or the dialog. */
+	initialFocus?: RefObject<HTMLElement | null>;
+}
 
 const POSITIONER: CSSProperties = {
 	position: "fixed",
@@ -190,11 +194,12 @@ function Presence() {
 }
 
 const Content = forwardRef<HTMLDivElement, ContentProps>(function Content(
-	{ children, style, ...props },
+	{ children, style, initialFocus, ...props },
 	ref,
 ) {
 	const context = useEclose();
 	const { present, portal, phase, refs, contentId, modal, centered } = context;
+	refs.initialFocus = initialFocus;
 	if (!present || !portal) return null;
 	return createPortal(
 		<ParentPortalProvider value={portal}>

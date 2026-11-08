@@ -70,6 +70,7 @@ interface Refs {
 	flightLayer: HTMLElement | null;
 	morph: Morph | null;
 	layer: Layer | null;
+	initialFocus: RefObject<HTMLElement | null> | undefined;
 	/** Shared elements are travelling, so the surface itself stays put. */
 	flown: boolean;
 }
@@ -133,6 +134,14 @@ function placeContent(refs: Refs, options: RootOptions): void {
 	positioner.style.transform = `translate(${x - origin.x}px, ${y - origin.y}px)`;
 }
 
+/** What takes focus on opening, or null if an `autoFocus` child already has it. */
+function focusTarget({ surface, initialFocus }: Refs): HTMLElement | null {
+	if (!surface) return null;
+	if (initialFocus?.current) return initialFocus.current;
+	if (surface.contains(document.activeElement)) return null;
+	return surface.querySelector<HTMLElement>("[autofocus]") ?? surface;
+}
+
 function createPortalRoot(): HTMLElement {
 	const el = document.createElement("div");
 	el.setAttribute("data-eclose", "");
@@ -163,6 +172,7 @@ export function useRoot(options: RootOptions): EcloseContext {
 		flightLayer: null,
 		morph: null,
 		layer: null,
+		initialFocus: undefined,
 		flown: false,
 	}).current;
 	const shared = useRef(new Map<string, SharedPair>()).current;
@@ -197,11 +207,7 @@ export function useRoot(options: RootOptions): EcloseContext {
 		trigger: () => refs.trigger,
 		surface: () => refs.surface,
 		source: () => (refs.trigger?.isConnected ? refs.trigger : null),
-		initialFocus: () => {
-			const surface = refs.surface;
-			if (!surface || surface.contains(document.activeElement)) return null;
-			return surface.querySelector<HTMLElement>("[autofocus]") ?? surface;
-		},
+		initialFocus: () => focusTarget(refs),
 		onPhase: (next) => {
 			setPhase(next);
 			refs.surface?.toggleAttribute("inert", next === "closing");
@@ -378,9 +384,7 @@ export function usePresence(context: EcloseContext): void {
 			placeContent(refs, live.current);
 			controller.settle();
 			if (refs.trigger && !refs.flown) refs.trigger.style.opacity = "0";
-			(surface.querySelector<HTMLElement>("[autofocus]") ?? surface).focus({
-				preventScroll: true,
-			});
+			focusTarget(refs)?.focus({ preventScroll: true });
 		} else {
 			controller.open();
 		}

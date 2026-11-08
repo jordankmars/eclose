@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { act, StrictMode } from "react";
+import { act, StrictMode, useRef } from "react";
 import { describe, expect, it, vi } from "vitest";
 import { Eclose } from "./eclose";
 import { $, click, dialog, render, settle, trigger } from "./test-utils";
@@ -25,6 +25,20 @@ function Dialog(props: {
 				</Eclose.Content>
 			</Eclose.Root>
 		</>
+	);
+}
+
+function WithInitialFocus(props: { attached: boolean; defaultOpen?: boolean }) {
+	const target = useRef<HTMLButtonElement>(null);
+	return (
+		<Eclose.Root defaultOpen={props.defaultOpen}>
+			<Eclose.Trigger>Open</Eclose.Trigger>
+			<Eclose.Content initialFocus={target}>
+				{/* biome-ignore lint/a11y/noAutofocus: what's under test */}
+				<input id="auto" autoFocus />
+				{props.attached && <button id="target" type="button" ref={target} />}
+			</Eclose.Content>
+		</Eclose.Root>
 	);
 }
 
@@ -87,6 +101,33 @@ describe("focus", () => {
 		expect(document.activeElement).toBe(dialog());
 		key("Escape");
 		expect(document.activeElement).toBe(trigger());
+	});
+
+	it("prefers the initialFocus ref over an autoFocus child", async () => {
+		render(<WithInitialFocus attached />);
+		click(trigger());
+		expect(document.activeElement).toBe($("#target"));
+		expect(dialog().hasAttribute("initialfocus")).toBe(false);
+		await settle();
+	});
+
+	it("falls through when the initialFocus ref is still null", async () => {
+		render(<WithInitialFocus attached={false} />);
+		click(trigger());
+		expect(document.activeElement).toBe($("#auto"));
+		await settle();
+	});
+
+	it("uses the initialFocus ref when mounted open", async () => {
+		render(<WithInitialFocus attached defaultOpen />);
+		expect(document.activeElement).toBe($("#target"));
+		await settle();
+	});
+
+	it("keeps an autoFocus child focused when mounted open", async () => {
+		render(<WithInitialFocus attached={false} defaultOpen />);
+		expect(document.activeElement).toBe($("#auto"));
+		await settle();
 	});
 
 	it("leaves a React autoFocus element focused", async () => {

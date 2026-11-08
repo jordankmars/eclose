@@ -28,14 +28,14 @@ eclose ships no CSS. Style the parts with your own classes, and the motion takes
 
 ### Parts
 
-| Part                                 | Props                                                                             |
-| ------------------------------------ | --------------------------------------------------------------------------------- |
-| `Eclose.Root`                        | `open`, `defaultOpen`, `onOpenChange`, `placement`, `modal`, `swipe`, `container` |
-| `Eclose.Trigger`, `Eclose.Close`     | `asChild`, plus button props                                                      |
-| `Eclose.Content`                     | div props. Focus goes to an `autoFocus` child if there is one, or else the dialog |
-| `Eclose.Shared`                      | `id` (required), `asChild`                                                        |
-| `Eclose.Overlay`                     | div props. You color it, and it fades on its own                                  |
-| `Eclose.Title`, `Eclose.Description` | Label the dialog for assistive technology                                         |
+| Part                                 | Props                                                                                                  |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------ |
+| `Eclose.Root`                        | `open`, `defaultOpen`, `onOpenChange`, `placement`, `modal`, `swipe`, `container`                      |
+| `Eclose.Trigger`, `Eclose.Close`     | `asChild`, plus button props                                                                           |
+| `Eclose.Content`                     | `initialFocus` ref, plus div props. Without it, focus goes to an `autoFocus` child, or else the dialog |
+| `Eclose.Shared`                      | `id` (required), `asChild`                                                                             |
+| `Eclose.Overlay`                     | div props. You color it, and it fades on its own                                                       |
+| `Eclose.Title`, `Eclose.Description` | Label the dialog for assistive technology                                                              |
 
 Every part also has `data-state`: `closed`, `opening`, `open` or `closing`.
 
