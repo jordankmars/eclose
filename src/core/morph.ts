@@ -117,6 +117,7 @@ export class Morph implements Animated {
 	private layout: Rect = { x: 0, y: 0, w: 0, h: 0 };
 	private done: (() => void) | null = null;
 	private hold = false;
+	private atRest: Box | null = null;
 	// Surface mode only: how far open it is, 0 to 100. A spring of its own
 	// because a surface that doesn't travel still has to fade.
 	private fader: SpringState | null = null;
@@ -152,7 +153,8 @@ export class Morph implements Animated {
 	measure(): Box {
 		this.layout = pageRect(this.el);
 		if (this.options.mode === "surface") this.readRest();
-		return { ...this.layout, r: cornerOf(this.el, this.layout) };
+		this.atRest = { ...this.layout, r: cornerOf(this.el, this.layout) };
+		return this.atRest;
 	}
 
 	/** Clears every inline style the morph wrote, so layout can be read cleanly. */
@@ -239,6 +241,55 @@ export class Morph implements Animated {
 		const reduced = this.options.mode === "surface" && isReduced();
 		this.start(from, reduced ? from : target, 0, done);
 		this.hold = this.running;
+	}
+
+	/**
+	 * Points a flight somewhere new because the layout changed under it: the
+	 * window resized, or the content grew. Velocity and the completion callback
+	 * carry over. With no target it heads for the element's fresh layout box.
+	 */
+	retarget(target?: Box): void {
+		const s = this.springs;
+		if (!this.running || !s) return;
+		const held = this.hold;
+		this.release();
+		const box = this.measure();
+		this.hold = held;
+		const to = target ?? box;
+		for (const k of BOX_KEYS) s[k].to = to[k];
+		this.freeze();
+		this.apply();
+	}
+
+	/** Puts the element exactly at `box` and keeps it there, for following a finger. */
+	drag(box: Box): void {
+		if (this.options.mode === "surface" && !this.hold) {
+			this.release();
+			this.measure();
+			this.freeze();
+		}
+		this.stop();
+		this.hold = true;
+		this.done = null;
+		const springs = {} as Springs;
+		for (const k of BOX_KEYS) springs[k] = { x: box[k], v: 0, to: box[k] };
+		this.springs = springs;
+		this.fader = { x: 100, v: 0, to: 100 };
+		this.apply();
+	}
+
+	/** Lets go after `drag`: springs home carrying the velocity of the throw. */
+	fling(velocity: Partial<Box>): void {
+		const s = this.springs;
+		const rest = this.atRest;
+		if (!s || !rest) return;
+		for (const k of BOX_KEYS) {
+			s[k].to = rest[k];
+			s[k].v = velocity[k] ?? 0;
+		}
+		this.hold = false;
+		this.running = true;
+		track(this);
 	}
 
 	step(dt: number): void {

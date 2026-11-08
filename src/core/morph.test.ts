@@ -157,3 +157,79 @@ describe("surface mode", () => {
 		m.destroy();
 	});
 });
+
+describe("retarget", () => {
+	it("heads somewhere new without losing speed or the callback", () => {
+		const { el, m } = surface();
+		let done = false;
+		m.go(box(0, 0, 10, 10), m.measure(), () => {
+			done = true;
+		});
+		for (let i = 0; i < 5; i++) m.step(1 / 60);
+		const before = m.current();
+		m.retarget(box(500, 500, 300, 400));
+		expect(m.current()).toEqual(before);
+		expect(Number.parseFloat(el.style.width)).toBeCloseTo(before.w, 2);
+		for (let i = 0; i < 300 && !done; i++) m.step(1 / 60);
+		expect(done).toBe(true);
+	});
+
+	it("reads the new layout when given no target", () => {
+		const { el, m } = surface();
+		m.go(box(0, 0, 10, 10), m.measure());
+		REST.w = 500;
+		m.retarget();
+		REST.w = 300;
+		for (let i = 0; i < 300 && m.running; i++) m.step(1 / 60);
+		expect(m.running).toBe(false);
+		expect(el.style.width).toBe("");
+	});
+
+	it("does nothing when nothing is moving", () => {
+		const { el, m } = surface();
+		m.measure();
+		m.retarget(box(500, 500, 10, 10));
+		expect(el.style.transform).toBe("");
+	});
+});
+
+describe("drag and fling", () => {
+	it("follows a box exactly", () => {
+		const { el, m } = surface();
+		const rest = m.measure();
+		m.drag({ ...rest, y: rest.y + 40 });
+		expect(el.style.transform).toBe("translate(0px, 40px)");
+		expect(el.style.width).toBe("300px");
+		expect(m.running).toBe(false);
+		expect(m.now().y).toBe(rest.y + 40);
+		m.destroy();
+	});
+
+	it("carries a throw's velocity on the way home", () => {
+		const { m } = surface();
+		const rest = m.measure();
+		m.drag({ ...rest, y: rest.y + 40 });
+		m.fling({ y: 2000 });
+		m.step(1 / 60);
+		expect(m.current().y).toBeGreaterThan(rest.y + 40);
+		for (let i = 0; i < 300 && m.running; i++) m.step(1 / 60);
+		expect(m.running).toBe(false);
+		m.destroy();
+	});
+
+	it("lets a close take over the live spring", () => {
+		const { m } = surface();
+		const rest = m.measure();
+		m.drag({ ...rest, y: rest.y + 40 });
+		m.fling({ y: 2000 });
+		m.step(1 / 60);
+		const at = m.current();
+		m.to(box(0, 0, 10, 10));
+		expect(m.current()).toEqual(at);
+		m.step(1 / 60);
+		// From a standstill this spring would drop about 14px in one frame. The
+		// downward throw is still fighting it.
+		expect(at.y - m.current().y).toBeLessThan(10);
+		m.destroy();
+	});
+});
