@@ -2,6 +2,7 @@
 
 export { morph } from "./batch";
 export { configure, type MotionConfig } from "./config";
+export { Controller, type ControllerOptions, type Phase } from "./controller";
 export type { Box, Rect } from "./geometry";
 export { pageBox } from "./geometry";
 export { Morph, type MorphOptions } from "./morph";
