@@ -17,8 +17,13 @@ import {
 	lockScroll,
 	Morph,
 	type Phase,
+	pageBox,
+	pageRect,
+	place,
 	pushLayer,
 	tabEdge,
+	viewport,
+	watch,
 } from "../core";
 
 // How React drives the core: the DOM always follows state, and a layout effect
@@ -55,6 +60,7 @@ interface Refs {
 	trigger: HTMLElement | null;
 	surface: HTMLElement | null;
 	inner: HTMLElement | null;
+	positioner: HTMLElement | null;
 	overlay: HTMLElement | null;
 	morph: Morph | null;
 }
@@ -71,6 +77,7 @@ export interface EcloseContext {
 	titleId: string;
 	descriptionId: string;
 	modal: boolean;
+	centered: boolean;
 	live: RefObject<RootOptions>;
 	/** Open on the first render, so it should appear without motion. */
 	settleNext: RefObject<boolean>;
@@ -91,6 +98,20 @@ export function useEclose(): EcloseContext {
 
 function isModal({ modal, placement }: RootOptions): boolean {
 	return modal ?? placement === "centered";
+}
+
+/** Puts anchored content in its resting place, over the trigger. */
+function placeContent(refs: Refs, options: RootOptions): void {
+	const { positioner, surface, trigger } = refs;
+	if (options.placement === "centered" || !positioner || !surface) return;
+	if (!trigger?.isConnected) return;
+	// Clearing first means the origin is correct whatever the portal sits inside.
+	positioner.style.transform = "";
+	// Until now it's fixed, so an autofocused child can't scroll the page to it.
+	positioner.style.position = "absolute";
+	const origin = pageRect(positioner);
+	const { x, y } = place(pageRect(trigger), pageRect(surface), viewport());
+	positioner.style.transform = `translate(${x - origin.x}px, ${y - origin.y}px)`;
 }
 
 function createPortalRoot(): HTMLElement {
@@ -118,6 +139,7 @@ export function useRoot(options: RootOptions): EcloseContext {
 		trigger: null,
 		surface: null,
 		inner: null,
+		positioner: null,
 		overlay: null,
 		morph: null,
 	}).current;
@@ -132,6 +154,7 @@ export function useRoot(options: RootOptions): EcloseContext {
 		morph: () => refs.morph,
 		commit: () => {},
 		dismiss: false,
+		layout: () => placeContent(refs, live.current),
 		trigger: () => refs.trigger,
 		surface: () => refs.surface,
 		source: () => (refs.trigger?.isConnected ? refs.trigger : null),
@@ -175,6 +198,7 @@ export function useRoot(options: RootOptions): EcloseContext {
 		titleId: `${contentId}t`,
 		descriptionId: `${contentId}d`,
 		modal: isModal(options),
+		centered: options.placement === "centered",
 		live,
 		settleNext,
 	};
@@ -271,7 +295,36 @@ export function usePresence(context: EcloseContext): void {
 			? [lockScroll(() => refs.surface), inertOthers(portal)]
 			: [];
 
+		// Something moved underneath: at rest it just gets placed again, and a
+		// morph in the air bends toward wherever it should now end up.
+		const follow = () => {
+			const morph = refs.morph;
+			const { trigger } = refs;
+			if (!morph) return;
+			if (controller.phase === "closing") {
+				if (trigger?.isConnected) morph.retarget(pageBox(trigger));
+			} else if (morph.running) {
+				morph.release();
+				placeContent(refs, live.current);
+				morph.retarget();
+			} else if (!morph.held) {
+				placeContent(refs, live.current);
+			}
+		};
+		release.push(watch(() => refs.trigger, follow));
+
+		// The surface's own size is being animated, so its children are what show
+		// a real change in content height. Every observer reports once at the start.
+		let reported = false;
+		const resizes = new ResizeObserver(() => {
+			if (reported) follow();
+			reported = true;
+		});
+		for (const child of refs.inner?.children ?? []) resizes.observe(child);
+		release.push(() => resizes.disconnect());
+
 		if (settleNext.current) {
+			placeContent(refs, live.current);
 			controller.settle();
 			if (refs.trigger) refs.trigger.style.opacity = "0";
 			(surface.querySelector<HTMLElement>("[autofocus]") ?? surface).focus({

@@ -1,5 +1,6 @@
 import {
 	type ComponentPropsWithoutRef,
+	type CSSProperties,
 	cloneElement,
 	createElement,
 	forwardRef,
@@ -149,6 +150,24 @@ const Close = forwardRef<HTMLButtonElement, CloseProps>(function Close(
 
 export type ContentProps = ComponentPropsWithoutRef<"div">;
 
+const POSITIONER: CSSProperties = {
+	position: "fixed",
+	pointerEvents: "none",
+	zIndex: 1,
+};
+const CENTERED: CSSProperties = {
+	...POSITIONER,
+	inset: 0,
+	display: "grid",
+	placeItems: "center",
+};
+const ANCHORED: CSSProperties = {
+	...POSITIONER,
+	top: 0,
+	left: 0,
+	width: "max-content",
+};
+
 function Presence() {
 	usePresence(useEclose());
 	return null;
@@ -159,19 +178,15 @@ const Content = forwardRef<HTMLDivElement, ContentProps>(function Content(
 	ref,
 ) {
 	const context = useEclose();
-	const { present, portal, phase, refs, contentId, modal } = context;
+	const { present, portal, phase, refs, contentId, modal, centered } = context;
 	if (!present || !portal) return null;
 	return createPortal(
 		<ParentPortalProvider value={portal}>
 			<div
-				style={{
-					position: "fixed",
-					inset: 0,
-					display: "grid",
-					placeItems: "center",
-					pointerEvents: "none",
-					zIndex: 1,
+				ref={(el) => {
+					if (el) refs.positioner = el;
 				}}
+				style={centered ? CENTERED : ANCHORED}
 			>
 				<div
 					id={contentId}

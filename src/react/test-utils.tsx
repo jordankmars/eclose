@@ -9,6 +9,31 @@ import { configure } from "../core";
 	globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }
 ).IS_REACT_ACT_ENVIRONMENT = true;
 
+/** jsdom has no layout, so tests fire these by hand with `resized()`. */
+const observers = new Set<() => void>();
+
+class FakeResizeObserver {
+	private fire: () => void;
+	constructor(fire: () => void) {
+		this.fire = fire;
+		observers.add(this.fire);
+		// Real observers report once on starting to observe.
+		fire();
+	}
+	observe() {}
+	unobserve() {}
+	disconnect() {
+		observers.delete(this.fire);
+	}
+}
+
+globalThis.ResizeObserver =
+	FakeResizeObserver as unknown as typeof ResizeObserver;
+
+export function resized(): void {
+	for (const fire of observers) fire();
+}
+
 const mounted: Root[] = [];
 
 beforeEach(() => configure({ speed: 500 }));
