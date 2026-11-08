@@ -113,6 +113,18 @@ export class Morph implements Animated {
 		this.apply();
 	}
 
+	/**
+	 * Springs toward a box that isn't this element's layout, like the thumbnail
+	 * a detail view came from. The element keeps its own layout the whole time
+	 * and is transformed onto the target.
+	 */
+	to(target: Box, done: (() => void) | null = null): void {
+		const from = this.now();
+		this.release();
+		this.measure();
+		this.go(from, target, done);
+	}
+
 	step(dt: number): void {
 		const s = this.springs;
 		if (!s) return;
