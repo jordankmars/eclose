@@ -100,6 +100,16 @@ export class Morph implements Animated {
 	 * layout box it is transforming from.
 	 */
 	go(from: Box, to: Box, done: (() => void) | null = null): void {
+		if (config.reduced) {
+			// Nothing travels: the element appears in place with a short fade.
+			this.destroy();
+			this.el.animate([{ opacity: 0.2 }, { opacity: 1 }], {
+				duration: 200,
+				easing: "ease-out",
+			});
+			done?.();
+			return;
+		}
 		this.done = done;
 		if (this.running && this.springs && this.options.handoff !== false) {
 			for (const k of BOX_KEYS) this.springs[k].to = to[k];
