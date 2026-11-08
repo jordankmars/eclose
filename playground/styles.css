@@ -102,6 +102,36 @@ p {
 	font-size: 15px;
 }
 
+/* Control bar */
+.bar {
+	position: sticky;
+	top: 0;
+	z-index: 20;
+	background: color-mix(in srgb, var(--bg) 88%, transparent);
+	backdrop-filter: blur(10px);
+	-webkit-backdrop-filter: blur(10px);
+	border-bottom: 1px solid var(--line);
+}
+.bar .wrap {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px 24px;
+	padding-block: 10px;
+	align-items: center;
+}
+.ctl {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+.ctl > span {
+	font-family: var(--mono);
+	font-size: 11px;
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+	color: var(--muted);
+}
+
 /* Chips and buttons */
 .chips {
 	display: inline-flex;
@@ -619,6 +649,9 @@ p {
 	transition:
 		opacity 0.18s ease,
 		transform 0.3s ease;
+}
+.reduced .detail-body {
+	transform: none;
 }
 .ov.in .detail-body {
 	opacity: 1;

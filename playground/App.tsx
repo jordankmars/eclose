@@ -16,7 +16,13 @@ import {
 } from "react";
 import { flushSync } from "react-dom";
 import { createRoot } from "react-dom/client";
-import { Morph, type MorphOptions, morph, pageBox } from "../src/core";
+import {
+	configure,
+	Morph,
+	type MorphOptions,
+	morph,
+	pageBox,
+} from "../src/core";
 
 function useMorph<T extends HTMLElement>(
 	options: () => MorphOptions = () => ({}),
@@ -714,6 +720,73 @@ function Interruption() {
 	);
 }
 
+// ---------- Controls ----------
+
+const SPRINGS = {
+	snappy: { duration: 0.32, bounce: 0 },
+	smooth: { duration: 0.5, bounce: 0 },
+	bouncy: { duration: 0.55, bounce: 0.32 },
+};
+
+function Controls() {
+	const [spring, setSpring] = useState<keyof typeof SPRINGS>("smooth");
+	const [speed, setSpeed] = useState<"1" | "0.25">("1");
+	const [motion, setMotion] = useState<"full" | "reduced">(() =>
+		matchMedia("(prefers-reduced-motion: reduce)").matches ? "reduced" : "full",
+	);
+
+	useEffect(() => configure(SPRINGS[spring]), [spring]);
+	useEffect(() => configure({ speed: Number(speed) }), [speed]);
+	useEffect(() => {
+		configure({ reduced: motion === "reduced" });
+		document.documentElement.classList.toggle("reduced", motion === "reduced");
+	}, [motion]);
+
+	return (
+		<div className="bar">
+			<div className="wrap">
+				<div className="ctl">
+					<span>Spring</span>
+					<Chips
+						label="Spring"
+						options={[
+							["snappy", "Snappy"],
+							["smooth", "Smooth"],
+							["bouncy", "Bouncy"],
+						]}
+						value={spring}
+						onChange={setSpring}
+					/>
+				</div>
+				<div className="ctl">
+					<span>Speed</span>
+					<Chips
+						label="Speed"
+						options={[
+							["1", "1×"],
+							["0.25", "¼×"],
+						]}
+						value={speed}
+						onChange={setSpeed}
+					/>
+				</div>
+				<div className="ctl">
+					<span>Motion</span>
+					<Chips
+						label="Motion"
+						options={[
+							["full", "Full"],
+							["reduced", "Reduced"],
+						]}
+						value={motion}
+						onChange={setMotion}
+					/>
+				</div>
+			</div>
+		</div>
+	);
+}
+
 function App() {
 	return (
 		<>
@@ -725,6 +798,7 @@ function App() {
 					restarting.
 				</p>
 			</header>
+			<Controls />
 			<main className="wrap grid">
 				<CardToDetail />
 				<Popover />
