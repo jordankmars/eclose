@@ -68,6 +68,89 @@ function Chips<T extends string>({
 	);
 }
 
+// ---------- Corner correction ----------
+
+function Avatar({
+	open,
+	onToggle,
+	m,
+	el,
+}: {
+	open: boolean;
+	onToggle: () => void;
+	m: RefObject<HTMLButtonElement | null>;
+	el: RefObject<HTMLDivElement | null>;
+}) {
+	return (
+		<button
+			type="button"
+			className={open ? "av open" : "av"}
+			ref={m}
+			onClick={onToggle}
+		>
+			<div className="av-in" ref={el}>
+				<i>MK</i>
+				<div className="av-text">
+					<b>Mara Kim</b>
+					<span>Motion designer</span>
+				</div>
+			</div>
+		</button>
+	);
+}
+
+function CornerCorrection() {
+	const [open, setOpen] = useState(false);
+	const innerA = useRef<HTMLDivElement>(null);
+	const innerB = useRef<HTMLDivElement>(null);
+	const [a, aM] = useMorph<HTMLButtonElement>(() => ({
+		counter: innerA.current,
+	}));
+	const [b, bM] = useMorph<HTMLButtonElement>(() => ({
+		counter: innerB.current,
+		radius: false,
+	}));
+
+	const toggle = () =>
+		morphState([aM.current, bM.current], () => setOpen((o) => !o));
+
+	return (
+		<section className="demo">
+			<div className="demo-h">
+				<h2>Corner correction</h2>
+				<p>
+					A circle opening into a card. Plain FLIP scales the final corners, so
+					they squash at the start.
+				</p>
+			</div>
+			<div className="stage">
+				<div className="pair">
+					<div className="half">
+						<span>Corrected</span>
+						<div>
+							<Avatar open={open} onToggle={toggle} m={a} el={innerA} />
+						</div>
+					</div>
+					<div className="half">
+						<span>Plain FLIP</span>
+						<div>
+							<Avatar open={open} onToggle={toggle} m={b} el={innerB} />
+						</div>
+					</div>
+				</div>
+			</div>
+			<div className="demo-f">
+				<span className="how">radius ÷ scale, per axis</span>
+				<div className="acts">
+					<button type="button" className="btn" onClick={toggle}>
+						Toggle both
+					</button>
+				</div>
+			</div>
+		</section>
+	);
+}
+
 // ---------- Interruption ----------
 
 const PUCK = 48;
@@ -201,6 +284,7 @@ function App() {
 				</p>
 			</header>
 			<main className="wrap grid">
+				<CornerCorrection />
 				<Interruption />
 			</main>
 		</>
