@@ -207,3 +207,30 @@ p {
 	color: var(--muted);
 	letter-spacing: 0.02em;
 }
+
+/* Interruption */
+.pad {
+	cursor: crosshair;
+	display: block;
+}
+.pad canvas {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+}
+.puck {
+	position: absolute;
+	width: 48px;
+	height: 48px;
+	border-radius: 14px;
+	background: var(--ink);
+}
+.pad .hint {
+	position: absolute;
+	left: 14px;
+	bottom: 12px;
+	font-size: 12px;
+	color: var(--muted);
+	pointer-events: none;
+}
