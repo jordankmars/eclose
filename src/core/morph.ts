@@ -54,6 +54,7 @@ export class Morph implements Animated {
 	private springs: Springs | null = null;
 	private layout: Rect = { x: 0, y: 0, w: 0, h: 0 };
 	private done: (() => void) | null = null;
+	private hold = false;
 
 	constructor(el: HTMLElement, options: MorphOptions = {}) {
 		this.el = el;
@@ -100,6 +101,7 @@ export class Morph implements Animated {
 	 * layout box it is transforming from.
 	 */
 	go(from: Box, to: Box, done: (() => void) | null = null): void {
+		this.hold = false;
 		if (config.reduced) {
 			// Nothing travels: the element appears in place with a short fade.
 			this.destroy();
@@ -126,13 +128,15 @@ export class Morph implements Animated {
 	/**
 	 * Springs toward a box that isn't this element's layout, like the thumbnail
 	 * a detail view came from. The element keeps its own layout the whole time
-	 * and is transformed onto the target.
+	 * and is transformed onto the target, where it stays until the next
+	 * `release()`, `go()` or `destroy()`.
 	 */
 	to(target: Box, done: (() => void) | null = null): void {
 		const from = this.now();
 		this.release();
 		this.measure();
 		this.go(from, target, done);
+		this.hold = true;
 	}
 
 	step(dt: number): void {
@@ -150,10 +154,14 @@ export class Morph implements Animated {
 		this.running = false;
 	}
 
-	/** Ends the morph at rest and runs its completion callback. */
+	/**
+	 * Ends the morph and runs its completion callback. A morph that landed on
+	 * its own layout is released. One that landed elsewhere holds its last frame,
+	 * because releasing would snap it home before the caller can hide it.
+	 */
 	finish(): void {
 		this.stop();
-		this.release();
+		if (!this.hold) this.release();
 		const done = this.done;
 		this.done = null;
 		done?.();
