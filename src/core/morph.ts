@@ -144,6 +144,11 @@ export class Morph implements Animated {
 		return this.running || this.hold ? this.current() : pageBox(this.el);
 	}
 
+	/** Parked or heading somewhere other than its own layout box. */
+	get held(): boolean {
+		return this.hold;
+	}
+
 	/** Surface mode: how far open it is, from 0 to 100. */
 	get progress(): number {
 		return this.fader?.x ?? 100;

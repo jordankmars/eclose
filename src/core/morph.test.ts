@@ -205,6 +205,17 @@ describe("drag and fling", () => {
 		m.destroy();
 	});
 
+	it("reports being held while dragged, and not once let go", () => {
+		const { m } = surface();
+		const rest = m.measure();
+		expect(m.held).toBe(false);
+		m.drag(rest);
+		expect(m.held).toBe(true);
+		m.fling({});
+		expect(m.held).toBe(false);
+		m.destroy();
+	});
+
 	it("carries a throw's velocity on the way home", () => {
 		const { m } = surface();
 		const rest = m.measure();
