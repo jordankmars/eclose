@@ -31,17 +31,22 @@
 		"build": "tsdown",
 		"dev": "tsdown --watch",
 		"typecheck": "tsc --noEmit",
-		"prepack": "pnpm build",
+		"prepack": "pnpm build && pnpm size",
 		"lint": "biome check .",
 		"format": "biome check --write .",
 		"test": "vitest run",
-		"play": "vite playground"
+		"play": "vite playground",
+		"size": "node scripts/size.mjs"
 	},
 	"peerDependencies": {
-		"react": ">=18"
+		"react": ">=18",
+		"react-dom": ">=18"
 	},
 	"peerDependenciesMeta": {
 		"react": {
+			"optional": true
+		},
+		"react-dom": {
 			"optional": true
 		}
 	},
