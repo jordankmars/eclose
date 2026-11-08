@@ -20,9 +20,24 @@ export function pageRect(el: Element): Rect {
 	return { x: r.left + scrollX, y: r.top + scrollY, w: r.width, h: r.height };
 }
 
+/**
+ * Turns a computed corner radius into pixels. It can be one or two values, and
+ * percentages stay percentages in computed style: horizontal resolves against
+ * the width, vertical against the height. Springs carry a single radius, so
+ * elliptical corners use the tighter of the two.
+ */
+export function parseRadius(value: string, rect: Rect): number {
+	const [first = "", second = first] = value.trim().split(/\s+/);
+	const resolve = (part: string, size: number) => {
+		const n = Number.parseFloat(part) || 0;
+		return part.endsWith("%") ? (n / 100) * size : n;
+	};
+	return Math.min(resolve(first, rect.w), resolve(second, rect.h));
+}
+
 /** The element's top-left radius, clamped the way the browser would draw it. */
 export function cornerOf(el: Element, rect: Rect): number {
-	const r = Number.parseFloat(getComputedStyle(el).borderTopLeftRadius) || 0;
+	const r = parseRadius(getComputedStyle(el).borderTopLeftRadius, rect);
 	return Math.min(r, rect.w / 2, rect.h / 2);
 }
 

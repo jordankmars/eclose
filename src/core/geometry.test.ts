@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { projection } from "./geometry";
+import { parseRadius, projection } from "./geometry";
 
 const layout = { x: 100, y: 200, w: 300, h: 150 };
 
@@ -42,5 +42,26 @@ describe("projection", () => {
 		const p = projection({ x: 0, y: 0, w: 0, h: 0 }, { ...layout, r: 0 });
 		expect(Number.isFinite(p.sx)).toBe(true);
 		expect(Number.isFinite(p.sy)).toBe(true);
+	});
+});
+
+describe("parseRadius", () => {
+	const rect = { x: 0, y: 0, w: 200, h: 100 };
+
+	it("reads pixels", () => {
+		expect(parseRadius("12px", rect)).toBe(12);
+	});
+
+	it("resolves percentages per axis and keeps the tighter one", () => {
+		expect(parseRadius("50%", rect)).toBe(50);
+		expect(parseRadius("50% 25%", rect)).toBe(25);
+	});
+
+	it("uses the smaller of two pixel values", () => {
+		expect(parseRadius("10px 20px", rect)).toBe(10);
+	});
+
+	it("treats a missing value as square", () => {
+		expect(parseRadius("", rect)).toBe(0);
 	});
 });
