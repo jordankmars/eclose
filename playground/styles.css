@@ -534,3 +534,111 @@ p {
 .search input::placeholder {
 	color: var(--muted);
 }
+
+/* Card to detail */
+.albums {
+	display: flex;
+	gap: 20px;
+	justify-content: center;
+	width: 100%;
+}
+.album {
+	display: grid;
+	gap: 8px;
+	width: min(170px, 30%);
+	text-align: left;
+}
+.art {
+	aspect-ratio: 1;
+	border-radius: 12px;
+}
+.album b {
+	display: block;
+	font-weight: 500;
+	font-size: 13px;
+}
+.album span {
+	color: var(--muted);
+	font-size: 12px;
+}
+.album:hover .art {
+	filter: brightness(1.05);
+}
+.ov {
+	position: fixed;
+	inset: 0;
+	z-index: 50;
+	display: grid;
+	place-items: center;
+	padding: 24px 16px;
+}
+.ov[hidden] {
+	display: none;
+}
+.ov-scrim {
+	position: absolute;
+	inset: 0;
+	background: var(--scrim);
+	opacity: 0;
+	transition: opacity 0.25s ease;
+}
+.ov.in .ov-scrim {
+	opacity: 1;
+}
+.detail {
+	position: relative;
+	width: min(440px, 100%);
+	padding: 12px;
+	display: grid;
+	gap: 14px;
+}
+.detail-bg {
+	position: absolute;
+	inset: 0;
+	background: var(--surface);
+	border-radius: 22px;
+	opacity: 0;
+	transition: opacity 0.2s ease;
+}
+.ov.in .detail-bg {
+	opacity: 1;
+	transition-delay: 0.04s;
+}
+.hero {
+	position: relative;
+	height: 230px;
+	border-radius: 14px;
+}
+.detail-body {
+	position: relative;
+	display: grid;
+	gap: 6px;
+	padding: 0 6px 6px;
+	opacity: 0;
+	transform: translateY(8px);
+	transition:
+		opacity 0.18s ease,
+		transform 0.3s ease;
+}
+.ov.in .detail-body {
+	opacity: 1;
+	transform: none;
+	transition-delay: 0.12s;
+}
+.detail-body h3 {
+	font-size: 20px;
+	font-weight: 600;
+	letter-spacing: -0.02em;
+}
+.detail-body .meta {
+	color: var(--muted);
+	font-size: 13px;
+	font-family: var(--mono);
+}
+.detail-body .text {
+	color: var(--muted);
+	max-width: 52ch;
+}
+.detail-body .acts {
+	margin-top: 8px;
+}

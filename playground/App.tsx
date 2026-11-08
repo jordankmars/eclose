@@ -16,7 +16,7 @@ import {
 } from "react";
 import { flushSync } from "react-dom";
 import { createRoot } from "react-dom/client";
-import { Morph, type MorphOptions, morph } from "../src/core";
+import { Morph, type MorphOptions, morph, pageBox } from "../src/core";
 
 function useMorph<T extends HTMLElement>(
 	options: () => MorphOptions = () => ({}),
@@ -66,6 +66,168 @@ function Chips<T extends string>({
 				</button>
 			))}
 		</fieldset>
+	);
+}
+
+// ---------- Card to detail ----------
+
+const ALBUMS = [
+	{
+		title: "Low Tide",
+		artist: "Harbor Lights",
+		meta: "Harbor Lights · 2026 · 11 tracks",
+		text: "Slow, tidal synth records made over one winter on the coast. Best with headphones and the window open.",
+		art: "linear-gradient(160deg,#0f4c5c,#5fa8a0 55%,#e3d9b8)",
+	},
+	{
+		title: "Ember Season",
+		artist: "Vesna",
+		meta: "Vesna · 2025 · 9 tracks",
+		text: "Warm brass and drum machines. The second side gets loud and stays there.",
+		art: "linear-gradient(150deg,#3b0d11,#c2410c 50%,#fbbf24)",
+	},
+	{
+		title: "Glasshouse",
+		artist: "Orla Finch",
+		meta: "Orla Finch · 2026 · 12 tracks",
+		text: "Folk songs recorded in a greenhouse, rain on the roof included.",
+		art: "linear-gradient(170deg,#14351f,#4d7c46 50%,#d9e8a8)",
+	},
+];
+
+function CardToDetail() {
+	// `open` is which album the overlay shows; `shown` drives the fade, and
+	// lags behind `open` so the overlay can play its exit before it hides.
+	const [open, setOpen] = useState<number | null>(null);
+	const [shown, setShown] = useState(false);
+	const closing = useRef(false);
+	const cards = useRef<(HTMLButtonElement | null)[]>([]);
+	const arts = useRef<(HTMLDivElement | null)[]>([]);
+	const overlay = useRef<HTMLDivElement>(null);
+	const closeButton = useRef<HTMLButtonElement>(null);
+	const [hero, heroM] = useMorph<HTMLDivElement>();
+
+	function openDetail(i: number) {
+		const art = arts.current[i];
+		const m = heroM.current;
+		if (open !== null || !art || !m) return;
+		const from = pageBox(art);
+		flushSync(() => setOpen(i));
+		// Commit the hidden state before fading in, or there's nothing to fade from.
+		void overlay.current?.offsetWidth;
+		flushSync(() => setShown(true));
+		m.release();
+		m.go(from, m.measure());
+		closeButton.current?.focus({ preventScroll: true });
+	}
+
+	const closeDetail = useCallback(() => {
+		if (open === null || closing.current) return;
+		const art = arts.current[open];
+		const m = heroM.current;
+		if (!art || !m) return;
+		closing.current = true;
+		setShown(false);
+		m.to(pageBox(art), () => {
+			closing.current = false;
+			setOpen(null);
+			cards.current[open]?.focus({ preventScroll: true });
+		});
+	}, [open, heroM]);
+
+	useEffect(() => {
+		const onKey = (e: KeyboardEvent) => {
+			if (e.key === "Escape") closeDetail();
+		};
+		document.addEventListener("keydown", onKey);
+		return () => document.removeEventListener("keydown", onKey);
+	}, [closeDetail]);
+
+	const album = open === null ? null : ALBUMS[open];
+
+	return (
+		<section className="demo wide">
+			<div className="demo-h">
+				<h2>Card to detail</h2>
+				<p>
+					The cover leaves the grid and becomes the header of the detail view,
+					then flies back when you close it.
+				</p>
+			</div>
+			<div className="stage">
+				<div className="albums">
+					{ALBUMS.map((a, i) => (
+						<button
+							type="button"
+							key={a.title}
+							className="album"
+							ref={(el) => {
+								cards.current[i] = el;
+							}}
+							onClick={() => openDetail(i)}
+						>
+							<div
+								className="art"
+								ref={(el) => {
+									arts.current[i] = el;
+								}}
+								style={{
+									background: a.art,
+									visibility: open === i ? "hidden" : undefined,
+								}}
+							/>
+							<div>
+								<b>{a.title}</b>
+								<span>{a.artist}</span>
+							</div>
+						</button>
+					))}
+				</div>
+			</div>
+			<div className="demo-f">
+				<span className="how">
+					shared element · two nodes · radius corrected
+				</span>
+				<span className="how">
+					Click a cover. Esc or the backdrop closes it.
+				</span>
+			</div>
+
+			<div
+				className={shown ? "ov in" : "ov"}
+				ref={overlay}
+				hidden={open === null}
+			>
+				<div className="ov-scrim" onPointerDown={closeDetail} />
+				<div
+					className="detail"
+					role="dialog"
+					aria-modal="true"
+					aria-labelledby="d-title"
+				>
+					<div className="detail-bg" />
+					<div className="hero" ref={hero} style={{ background: album?.art }} />
+					<div className="detail-body">
+						<p className="meta">{album?.meta}</p>
+						<h3 id="d-title">{album?.title}</h3>
+						<p className="text">{album?.text}</p>
+						<div className="acts">
+							<button type="button" className="btn primary">
+								Play
+							</button>
+							<button
+								type="button"
+								className="btn"
+								ref={closeButton}
+								onClick={closeDetail}
+							>
+								Close
+							</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
 	);
 }
 
@@ -564,6 +726,7 @@ function App() {
 				</p>
 			</header>
 			<main className="wrap grid">
+				<CardToDetail />
 				<Popover />
 				<Pill />
 				<Search />
