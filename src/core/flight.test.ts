@@ -49,6 +49,19 @@ describe("Flight", () => {
 		expect(source.style.visibility).toBe("hidden");
 	});
 
+	it("launches a return flight from where the destination is", () => {
+		const { f, dest, source, layer } = setup();
+		dest.getBoundingClientRect = () =>
+			({ left: 300, top: 200, width: 100, height: 50 }) as DOMRect;
+		source.getBoundingClientRect = () =>
+			({ left: 10, top: 10, width: 20, height: 20 }) as DOMRect;
+		f.fly(false, () => {});
+		const copy = layer.firstElementChild as HTMLElement;
+		expect(copy.style.left).toBe("300px");
+		expect(copy.style.top).toBe("200px");
+		f.destroy();
+	});
+
 	it("reuses the copy when interrupted", () => {
 		const { f, layer } = setup();
 		f.fly(true, () => {});

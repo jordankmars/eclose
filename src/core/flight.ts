@@ -1,5 +1,5 @@
 import { isReduced } from "./config";
-import { pageBox } from "./geometry";
+import { pageBox, pageRect } from "./geometry";
 import { Morph } from "./morph";
 
 // A shared element travelling on its own. The destination sits inside a surface
@@ -100,15 +100,17 @@ export class Flight {
 		clone.removeAttribute("id");
 		for (const el of clone.querySelectorAll("[id]")) el.removeAttribute("id");
 		const cs = getComputedStyle(dest);
-		const { width, height } = dest.getBoundingClientRect();
+		// Launched right on top of the destination, so that's where it's first seen.
+		const at = pageRect(dest);
+		const origin = pageRect(layer);
 		for (const prop of COPIED) clone.style[prop] = cs[prop];
 		Object.assign(clone.style, {
 			position: "absolute",
-			left: "0",
-			top: "0",
+			left: `${at.x - origin.x}px`,
+			top: `${at.y - origin.y}px`,
 			margin: "0",
-			width: `${width}px`,
-			height: `${height}px`,
+			width: `${at.w}px`,
+			height: `${at.h}px`,
 			visibility: "visible",
 		});
 		layer.append(clone);
