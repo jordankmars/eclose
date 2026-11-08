@@ -1,2 +1,8 @@
 // React adapter. Published as eclose/react.
-export {};
+export {
+	type CloseProps,
+	type ContentProps,
+	Eclose,
+	type RootProps,
+	type TriggerProps,
+} from "./eclose";
