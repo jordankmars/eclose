@@ -24,6 +24,13 @@ type Springs = Record<keyof Box, SpringState>;
 
 export interface MorphOptions {
 	/**
+	 * "transform" scales the element from its final layout, which is cheap and
+	 * leaves siblings alone. "size" animates real width and height instead, so
+	 * content reflows and clips rather than scales, and siblings move with it.
+	 * Default "transform".
+	 */
+	mode?: "transform" | "size";
+	/**
 	 * When retargeted mid-flight, keep the current position and velocity so the
 	 * motion bends toward the new target. Off restarts from rest. Default true.
 	 */
@@ -76,6 +83,10 @@ export class Morph implements Animated {
 		const st = this.el.style;
 		st.transform = "";
 		st.transformOrigin = "";
+		if (this.options.mode === "size") {
+			st.width = "";
+			st.height = "";
+		}
 		if (this.options.radius !== false) st.borderRadius = "";
 		const counter = this.options.counter?.style;
 		if (counter) {
@@ -134,6 +145,24 @@ export class Morph implements Animated {
 	}
 
 	apply(): void {
+		if (this.options.mode === "size") this.applySize();
+		else this.applyTransform();
+		this.options.onFrame?.(this);
+	}
+
+	private applySize(): void {
+		const st = this.el.style;
+		const { w, h, r } = this.current();
+		const width = Math.max(w, 1);
+		const height = Math.max(h, 1);
+		st.width = `${width}px`;
+		st.height = `${height}px`;
+		if (this.options.radius !== false) {
+			st.borderRadius = `${Math.max(0, Math.min(r, width / 2, height / 2))}px`;
+		}
+	}
+
+	private applyTransform(): void {
 		const st = this.el.style;
 		const { tx, ty, sx, sy, rx, ry } = projection(this.layout, this.current());
 		st.transformOrigin = "0 0";
@@ -144,6 +173,5 @@ export class Morph implements Animated {
 			counter.transformOrigin = "0 0";
 			counter.transform = `scale(${1 / sx}, ${1 / sy})`;
 		}
-		this.options.onFrame?.(this);
 	}
 }
