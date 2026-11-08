@@ -9,6 +9,8 @@ export interface Layer {
 	modal: boolean;
 	/** Asked to close: by Escape, or a press outside. */
 	dismiss: () => void;
+	/** Tab was pressed while this layer is on top. */
+	tab?: (e: KeyboardEvent) => void;
 }
 
 const stack: Layer[] = [];
@@ -24,8 +26,10 @@ export function isTop(layer: Layer): boolean {
 }
 
 function onKeyDown(e: KeyboardEvent): void {
-	if (e.key !== "Escape" || e.defaultPrevented) return;
-	stack[stack.length - 1]?.dismiss();
+	if (e.defaultPrevented) return;
+	const top = stack[stack.length - 1];
+	if (e.key === "Escape") top?.dismiss();
+	else if (e.key === "Tab") top?.tab?.(e);
 }
 
 /**

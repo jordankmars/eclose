@@ -96,6 +96,16 @@ describe("layers", () => {
 		expect(a.dismiss).toHaveBeenCalledOnce();
 	});
 
+	it("hands Tab to the top layer only", () => {
+		const a = layer();
+		const b = layer();
+		a.l.tab = vi.fn();
+		b.l.tab = vi.fn();
+		document.dispatchEvent(new KeyboardEvent("keydown", { key: "Tab" }));
+		expect(b.l.tab).toHaveBeenCalledOnce();
+		expect(a.l.tab).not.toHaveBeenCalled();
+	});
+
 	it("forgets a removed layer", () => {
 		const a = layer();
 		for (const off of cleanup.splice(0)) off();
