@@ -1,4 +1,4 @@
-import { config } from "./config";
+import { config, isReduced } from "./config";
 import { type Animated, track, untrack } from "./frame";
 import {
 	BOX_KEYS,
@@ -103,7 +103,7 @@ export class Morph implements Animated {
 	 */
 	go(from: Box, to: Box, done: (() => void) | null = null): void {
 		this.hold = false;
-		if (config.reduced) {
+		if (isReduced()) {
 			// Nothing travels: the element appears in place with a short fade.
 			this.destroy();
 			this.el.animate([{ opacity: 0.2 }, { opacity: 1 }], {
