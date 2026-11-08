@@ -227,8 +227,7 @@ function CardToDetail() {
 
 function Popover() {
 	const [open, setOpen] = useState(false);
-	const openRef = useRef(open);
-	openRef.current = open;
+	const controller = useRef<Controller>(null);
 	const inner = useRef<HTMLDivElement>(null);
 	const label = useRef<HTMLButtonElement>(null);
 	const firstItem = useRef<HTMLButtonElement>(null);
@@ -236,30 +235,19 @@ function Popover() {
 		counter: inner.current,
 	}));
 
-	const setPop = useCallback(
-		(next: boolean, returnFocus = false) => {
-			if (openRef.current === next) return;
-			morphState([popM.current], () => setOpen(next));
-			if (next) firstItem.current?.focus({ preventScroll: true });
-			else if (returnFocus) label.current?.focus({ preventScroll: true });
-		},
-		[popM],
-	);
-
 	useEffect(() => {
-		const onDown = (e: globalThis.PointerEvent) => {
-			if (!pop.current?.contains(e.target as Node)) setPop(false);
-		};
-		const onKey = (e: KeyboardEvent) => {
-			if (e.key === "Escape") setPop(false, true);
-		};
-		document.addEventListener("pointerdown", onDown);
-		document.addEventListener("keydown", onKey);
-		return () => {
-			document.removeEventListener("pointerdown", onDown);
-			document.removeEventListener("keydown", onKey);
-		};
-	}, [pop, setPop]);
+		const c = new Controller({
+			morph: () => popM.current,
+			commit: (next) => flushSync(() => setOpen(next)),
+			trigger: () => label.current,
+			surface: () => pop.current,
+			initialFocus: () => firstItem.current,
+		});
+		controller.current = c;
+		return () => c.destroy();
+	}, [pop, popM]);
+
+	const close = () => controller.current?.close();
 
 	return (
 		<section className="demo">
@@ -279,7 +267,7 @@ function Popover() {
 							ref={label}
 							aria-expanded={open}
 							hidden={open}
-							onClick={() => setPop(true)}
+							onClick={() => controller.current?.open()}
 						>
 							<svg
 								width="15"
@@ -301,11 +289,7 @@ function Popover() {
 						<div className="pop-panel" hidden={!open}>
 							<div className="pop-head">
 								<span>Share “Q3 roadmap”</span>
-								<button
-									type="button"
-									aria-label="Close"
-									onClick={() => setPop(false, true)}
-								>
+								<button type="button" aria-label="Close" onClick={close}>
 									<svg
 										width="12"
 										height="12"
@@ -327,7 +311,7 @@ function Popover() {
 										key={item}
 										className="pop-item"
 										ref={i === 0 ? firstItem : undefined}
-										onClick={() => setPop(false, true)}
+										onClick={close}
 									>
 										{item}
 										{i === 0 && <kbd>⌘C</kbd>}
