@@ -298,8 +298,10 @@ export function usePresence(context: EcloseContext): void {
 	}, [controller, refs]);
 
 	useIsoLayoutEffect(() => {
-		// Only take focus back if nothing else has claimed it in the meantime.
-		const returnFocus = () => {
+		if (!open) {
+			settleNext.current = false;
+			// Not in the cleanup: React puts focus back after running those, and
+			// Strict Mode runs them on a dialog that's staying open.
 			const active = document.activeElement;
 			if (
 				!active ||
@@ -308,13 +310,6 @@ export function usePresence(context: EcloseContext): void {
 			) {
 				refs.trigger?.focus({ preventScroll: true });
 			}
-		};
-
-		if (!open) {
-			settleNext.current = false;
-			// Has to happen here. React puts focus back after running cleanups,
-			// so anything moved there is undone while the element still exists.
-			returnFocus();
 			controller.close();
 			return;
 		}
@@ -393,7 +388,6 @@ export function usePresence(context: EcloseContext): void {
 		return () => {
 			popLayer();
 			for (const undo of release) undo();
-			returnFocus();
 		};
 	}, [
 		open,

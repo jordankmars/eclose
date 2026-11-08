@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { act } from "react";
+import { act, StrictMode } from "react";
 import { describe, expect, it, vi } from "vitest";
 import { Eclose } from "./eclose";
 import { $, click, dialog, render, settle, trigger } from "./test-utils";
@@ -98,6 +98,23 @@ describe("focus", () => {
 					<input id="field" autoFocus />
 				</Eclose.Content>
 			</Eclose.Root>,
+		);
+		click(trigger());
+		expect(document.activeElement).toBe($("#field"));
+		await settle();
+	});
+
+	it("keeps a React autoFocus element focused in Strict Mode", async () => {
+		render(
+			<StrictMode>
+				<Eclose.Root>
+					<Eclose.Trigger>Open</Eclose.Trigger>
+					<Eclose.Content>
+						{/* biome-ignore lint/a11y/noAutofocus: what's under test */}
+						<input id="field" autoFocus />
+					</Eclose.Content>
+				</Eclose.Root>
+			</StrictMode>,
 		);
 		click(trigger());
 		expect(document.activeElement).toBe($("#field"));
