@@ -6,6 +6,7 @@ export {
 	Eclose,
 	type OverlayProps,
 	type RootProps,
+	type SharedProps,
 	type TitleProps,
 	type TriggerProps,
 } from "./eclose";

@@ -12,6 +12,7 @@ import {
 } from "react";
 import {
 	Controller,
+	Flight,
 	inertOthers,
 	type Layer,
 	lockScroll,
@@ -62,7 +63,16 @@ interface Refs {
 	inner: HTMLElement | null;
 	positioner: HTMLElement | null;
 	overlay: HTMLElement | null;
+	flightLayer: HTMLElement | null;
 	morph: Morph | null;
+	/** Shared elements are travelling, so the surface itself stays put. */
+	flown: boolean;
+}
+
+/** One `Eclose.Shared` id: its element on the trigger's side and in the content. */
+export interface SharedPair {
+	source: HTMLElement | null;
+	dest: HTMLElement | null;
 }
 
 export interface EcloseContext {
@@ -78,6 +88,7 @@ export interface EcloseContext {
 	descriptionId: string;
 	modal: boolean;
 	centered: boolean;
+	shared: Map<string, SharedPair>;
 	live: RefObject<RootOptions>;
 	/** Open on the first render, so it should appear without motion. */
 	settleNext: RefObject<boolean>;
@@ -89,6 +100,8 @@ const ParentPortal = createContext<HTMLElement | null>(null);
 
 export const EcloseProvider = Context.Provider;
 export const ParentPortalProvider = ParentPortal.Provider;
+/** Whether a part sits inside the content, which makes a Shared the destination. */
+export const InContent = createContext(false);
 
 export function useEclose(): EcloseContext {
 	const context = useContext(Context);
@@ -141,8 +154,11 @@ export function useRoot(options: RootOptions): EcloseContext {
 		inner: null,
 		positioner: null,
 		overlay: null,
+		flightLayer: null,
 		morph: null,
+		flown: false,
 	}).current;
+	const shared = useRef(new Map<string, SharedPair>()).current;
 
 	const requestRef = useRef((next: boolean) => {
 		if (live.current.open === undefined) setOwn(next);
@@ -155,6 +171,22 @@ export function useRoot(options: RootOptions): EcloseContext {
 		commit: () => {},
 		dismiss: false,
 		layout: () => placeContent(refs, live.current),
+		flights: () => {
+			const flights: Flight[] = [];
+			for (const pair of shared.values()) {
+				if (pair.source && pair.dest) {
+					flights.push(
+						new Flight(
+							() => pair.source,
+							() => pair.dest,
+							() => refs.flightLayer,
+						),
+					);
+				}
+			}
+			refs.flown = flights.length > 0;
+			return flights;
+		},
 		trigger: () => refs.trigger,
 		surface: () => refs.surface,
 		source: () => (refs.trigger?.isConnected ? refs.trigger : null),
@@ -199,6 +231,7 @@ export function useRoot(options: RootOptions): EcloseContext {
 		descriptionId: `${contentId}d`,
 		modal: isModal(options),
 		centered: options.placement === "centered",
+		shared,
 		live,
 		settleNext,
 	};
@@ -223,7 +256,7 @@ export function usePresence(context: EcloseContext): void {
 		if (!surface) return;
 		const hideTrigger = (progress: number) => {
 			// Hidden once the surface is opaque above it, so nothing dips.
-			if (refs.trigger) {
+			if (refs.trigger && !refs.flown) {
 				refs.trigger.style.opacity = progress >= 25 ? "0" : "";
 			}
 		};
@@ -302,7 +335,9 @@ export function usePresence(context: EcloseContext): void {
 			const { trigger } = refs;
 			if (!morph) return;
 			if (controller.phase === "closing") {
-				if (trigger?.isConnected) morph.retarget(pageBox(trigger));
+				if (trigger?.isConnected && !refs.flown) {
+					morph.retarget(pageBox(trigger));
+				}
 			} else if (morph.running) {
 				morph.release();
 				placeContent(refs, live.current);
@@ -326,7 +361,7 @@ export function usePresence(context: EcloseContext): void {
 		if (settleNext.current) {
 			placeContent(refs, live.current);
 			controller.settle();
-			if (refs.trigger) refs.trigger.style.opacity = "0";
+			if (refs.trigger && !refs.flown) refs.trigger.style.opacity = "0";
 			(surface.querySelector<HTMLElement>("[autofocus]") ?? surface).focus({
 				preventScroll: true,
 			});

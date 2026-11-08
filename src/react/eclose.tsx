@@ -9,13 +9,18 @@ import {
 	type ReactElement,
 	type ReactNode,
 	type Ref,
+	useContext,
+	useRef,
 } from "react";
 import { createPortal } from "react-dom";
 import {
 	EcloseProvider,
+	InContent,
 	ParentPortalProvider,
 	type RootOptions,
+	type SharedPair,
 	useEclose,
+	useIsoLayoutEffect,
 	usePresence,
 	useRoot,
 } from "./use-eclose";
@@ -79,7 +84,11 @@ export interface RootProps extends RootOptions {
 }
 
 function Root({ children, ...options }: RootProps) {
-	return <EcloseProvider value={useRoot(options)}>{children}</EcloseProvider>;
+	return (
+		<EcloseProvider value={useRoot(options)}>
+			<InContent.Provider value={false}>{children}</InContent.Provider>
+		</EcloseProvider>
+	);
 }
 
 interface AsChild {
@@ -117,7 +126,7 @@ const Trigger = forwardRef<HTMLButtonElement, TriggerProps>(function Trigger(
 			if (!el) return;
 			refs.trigger = el;
 			// A replacement mounted while open shouldn't show through.
-			if (phase === "open") el.style.opacity = "0";
+			if (phase === "open" && !refs.flown) el.style.opacity = "0";
 		}) as Ref<never>,
 	);
 });
@@ -161,6 +170,13 @@ const CENTERED: CSSProperties = {
 	display: "grid",
 	placeItems: "center",
 };
+const FLIGHT_LAYER: CSSProperties = {
+	position: "absolute",
+	top: 0,
+	left: 0,
+	pointerEvents: "none",
+	zIndex: 2,
+};
 const ANCHORED: CSSProperties = {
 	...POSITIONER,
 	top: 0,
@@ -182,34 +198,45 @@ const Content = forwardRef<HTMLDivElement, ContentProps>(function Content(
 	if (!present || !portal) return null;
 	return createPortal(
 		<ParentPortalProvider value={portal}>
-			<div
-				ref={(el) => {
-					if (el) refs.positioner = el;
-				}}
-				style={centered ? CENTERED : ANCHORED}
-			>
+			<InContent.Provider value={true}>
 				<div
-					id={contentId}
-					role="dialog"
-					aria-modal={modal || undefined}
-					tabIndex={-1}
-					data-state={phase}
-					{...props}
-					ref={mergeRefs<HTMLDivElement | null>(ref, (el) => {
-						if (el) refs.surface = el;
-					})}
-					style={{ outline: "none", pointerEvents: "auto", ...style }}
+					ref={(el) => {
+						if (el) refs.positioner = el;
+					}}
+					style={centered ? CENTERED : ANCHORED}
 				>
 					<div
-						ref={(el) => {
-							if (el) refs.inner = el;
-						}}
-						style={{ display: "contents" }}
+						id={contentId}
+						role="dialog"
+						aria-modal={modal || undefined}
+						tabIndex={-1}
+						data-state={phase}
+						{...props}
+						ref={mergeRefs<HTMLDivElement | null>(ref, (el) => {
+							if (el) refs.surface = el;
+						})}
+						style={{ outline: "none", pointerEvents: "auto", ...style }}
 					>
-						{children}
+						<div
+							ref={(el) => {
+								if (el) refs.inner = el;
+							}}
+							style={{ display: "contents" }}
+						>
+							{children}
+						</div>
 					</div>
 				</div>
-			</div>
+			</InContent.Provider>
+			<div
+				ref={(el) => {
+					if (!el) return;
+					refs.flightLayer = el;
+					el.setAttribute("inert", "");
+				}}
+				aria-hidden
+				style={FLIGHT_LAYER}
+			/>
 			<Presence />
 		</ParentPortalProvider>,
 		portal,
@@ -254,6 +281,46 @@ const Description = forwardRef<HTMLParagraphElement, DescriptionProps>(
 	},
 );
 
+export interface SharedProps
+	extends Omit<ComponentPropsWithoutRef<"div">, "id">,
+		AsChild {
+	/** Matches this element with the one of the same id on the other side. */
+	id: string;
+}
+
+const Shared = forwardRef<HTMLDivElement, SharedProps>(function Shared(
+	{ id, asChild, ...props },
+	ref,
+) {
+	const { shared, controller } = useEclose();
+	const inside = useContext(InContent);
+	const own = useRef<HTMLElement | null>(null);
+
+	useIsoLayoutEffect(() => {
+		const el = own.current;
+		if (!el) return;
+		const side: keyof SharedPair = inside ? "dest" : "source";
+		const pair = shared.get(id) ?? { source: null, dest: null };
+		shared.set(id, pair);
+		pair[side] = el;
+		// A replacement mounted while open shouldn't show twice.
+		if (!inside && controller.phase === "open") el.style.visibility = "hidden";
+		return () => {
+			if (pair[side] === el) pair[side] = null;
+		};
+	}, [shared, controller, id, inside]);
+
+	return renderPart(
+		"div",
+		asChild,
+		props,
+		mergeRefs<HTMLElement | null>(
+			ref as Ref<HTMLElement | null>,
+			own,
+		) as Ref<never>,
+	);
+});
+
 export const Eclose = {
 	Root,
 	Trigger,
@@ -262,4 +329,5 @@ export const Eclose = {
 	Overlay,
 	Title,
 	Description,
+	Shared,
 };
