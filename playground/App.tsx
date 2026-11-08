@@ -41,6 +41,33 @@ function morphState(morphs: (Morph | null)[], update: () => void) {
 	morph(ready, () => flushSync(update));
 }
 
+function Chips<T extends string>({
+	label,
+	options,
+	value,
+	onChange,
+}: {
+	label: string;
+	options: [T, string][];
+	value: T;
+	onChange: (value: T) => void;
+}) {
+	return (
+		<fieldset className="chips" aria-label={label}>
+			{options.map(([v, text]) => (
+				<button
+					key={v}
+					type="button"
+					aria-pressed={v === value}
+					onClick={() => v !== value && onChange(v)}
+				>
+					{text}
+				</button>
+			))}
+		</fieldset>
+	);
+}
+
 // ---------- Interruption ----------
 
 const PUCK = 48;
@@ -50,6 +77,7 @@ function Interruption() {
 	const canvas = useRef<HTMLCanvasElement>(null);
 	const trail = useRef<[number, number][]>([]);
 	const [pos, setPos] = useState<{ x: number; y: number } | null>(null);
+	const [handoff, setHandoff] = useState<"keep" | "restart">("keep");
 
 	function drawTrail() {
 		const c = canvas.current;
@@ -144,6 +172,18 @@ function Interruption() {
 			</div>
 			<div className="demo-f">
 				<span className="how">retarget mid-flight</span>
+				<Chips
+					label="On interrupt"
+					options={[
+						["keep", "Keep velocity"],
+						["restart", "Restart"],
+					]}
+					value={handoff}
+					onChange={(v) => {
+						setHandoff(v);
+						if (puckM.current) puckM.current.options.handoff = v === "keep";
+					}}
+				/>
 			</div>
 		</section>
 	);

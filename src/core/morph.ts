@@ -23,6 +23,11 @@ import {
 type Springs = Record<keyof Box, SpringState>;
 
 export interface MorphOptions {
+	/**
+	 * When retargeted mid-flight, keep the current position and velocity so the
+	 * motion bends toward the new target. Off restarts from rest. Default true.
+	 */
+	handoff?: boolean;
 	/** Called after every applied frame. */
 	onFrame?: (morph: Morph) => void;
 }
@@ -72,9 +77,13 @@ export class Morph implements Animated {
 	 */
 	go(from: Box, to: Box, done: (() => void) | null = null): void {
 		this.done = done;
-		const springs = {} as Springs;
-		for (const k of BOX_KEYS) springs[k] = { x: from[k], v: 0, to: to[k] };
-		this.springs = springs;
+		if (this.running && this.springs && this.options.handoff !== false) {
+			for (const k of BOX_KEYS) this.springs[k].to = to[k];
+		} else {
+			const springs = {} as Springs;
+			for (const k of BOX_KEYS) springs[k] = { x: from[k], v: 0, to: to[k] };
+			this.springs = springs;
+		}
 		this.running = true;
 		track(this);
 		this.apply();

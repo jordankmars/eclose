@@ -105,6 +105,9 @@ p {
 /* Chips and buttons */
 .chips {
 	display: inline-flex;
+	margin: 0;
+	border: 0;
+	min-width: 0;
 	background: var(--stage);
 	border-radius: 8px;
 	padding: 2px;
