@@ -36,6 +36,8 @@
 		"format": "biome check --write .",
 		"test": "vitest run",
 		"play": "vite playground",
+		"site:dev": "pnpm build && pnpm --filter site dev",
+		"site:build": "pnpm build && pnpm --filter site build",
 		"size": "node scripts/size.mjs"
 	},
 	"peerDependencies": {
