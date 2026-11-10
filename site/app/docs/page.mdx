@@ -1,0 +1,19 @@
+export const metadata = { title: "Hello World" };
+
+# Hello World
+
+Welcome to the eclose docs. eclose is a dialog or popover that grows out of its trigger: a card becomes a detail view, a button becomes a menu, a pill becomes a panel.
+
+There's more to come. For now, here's the smallest one you can make:
+
+```tsx
+import { Eclose } from "eclose/react";
+
+<Eclose.Root>
+	<Eclose.Trigger>Share</Eclose.Trigger>
+	<Eclose.Content>
+		<Eclose.Title>Share this</Eclose.Title>
+		<Eclose.Close />
+	</Eclose.Content>
+</Eclose.Root>;
+```
