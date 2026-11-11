@@ -9,6 +9,7 @@ export {
 	watch,
 } from "./anchor";
 export { morph } from "./batch";
+export { clipOut, covering } from "./clip";
 export { configure, isReduced, type MotionConfig } from "./config";
 export { Controller, type ControllerOptions, type Phase } from "./controller";
 export { Flight } from "./flight";

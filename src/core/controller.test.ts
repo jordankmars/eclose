@@ -52,6 +52,18 @@ describe("Controller for adapters", () => {
 		morph.destroy();
 	});
 
+	it("reports each launch once the resting place is measured", () => {
+		const rests: unknown[] = [];
+		const { c, morph } = setup({
+			onLaunch: () => rests.push(morph.atRest?.w),
+		});
+		c.open();
+		expect(rests).toEqual([300]);
+		c.close();
+		expect(rests).toEqual([300, 300]);
+		morph.destroy();
+	});
+
 	it("opens from the trigger and returns to it", () => {
 		const { c, morph, surface, phases } = setup();
 		c.open();

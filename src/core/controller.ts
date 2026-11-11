@@ -33,6 +33,8 @@ export interface ControllerOptions {
 	 * closed. They fly above the surface as it grows from the source.
 	 */
 	flights?: () => Flight[];
+	/** Runs as the surface sets off, once its resting place is measured. */
+	onLaunch?: () => void;
 }
 
 /** Runs `then` once it has been called `count` times. */
@@ -80,6 +82,7 @@ export class Controller {
 		const done = latch(1 + this.flying.length, () => this.set("open"));
 		for (const f of this.flying) f.fly(true, done);
 		m.go(from, to, done);
+		this.options.onLaunch?.();
 		initialFocus?.()?.focus({ preventScroll: true });
 	}
 
@@ -96,6 +99,7 @@ export class Controller {
 			const origin = source();
 			if (origin) {
 				m.to(pageBox(origin), done);
+				this.options.onLaunch?.();
 			} else if (m.options.mode === "surface") {
 				m.to(shrunk(m.now()), done);
 			} else {

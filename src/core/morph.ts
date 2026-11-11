@@ -123,7 +123,8 @@ export class Morph implements Animated {
 	private layout: Rect = { x: 0, y: 0, w: 0, h: 0 };
 	private done: (() => void) | null = null;
 	private hold = false;
-	private atRest: Box | null = null;
+	/** Its own layout box, as last measured. */
+	atRest: Box | null = null;
 	// Surface mode only: how far open it is, 0 to 100. A spring of its own
 	// because a surface that doesn't travel still has to fade.
 	private fader: SpringState | null = null;
