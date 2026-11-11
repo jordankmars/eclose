@@ -80,8 +80,6 @@ interface Refs {
 	morph: Morph | null;
 	layer: Layer | null;
 	initialFocus: RefObject<HTMLElement | null> | undefined;
-	/** Shared elements are travelling, so the surface itself stays put. */
-	flown: boolean;
 }
 
 /** One `Eclose.Shared` id: its element on the trigger's side and in the content. */
@@ -191,7 +189,6 @@ export function useRoot(options: RootOptions): EcloseContext {
 		morph: null,
 		layer: null,
 		initialFocus: undefined,
-		flown: false,
 	}).current;
 	const shared = useRef(new Map<string, SharedPair>()).current;
 
@@ -219,7 +216,6 @@ export function useRoot(options: RootOptions): EcloseContext {
 					);
 				}
 			}
-			refs.flown = flights.length > 0;
 			return flights;
 		},
 		trigger: () => refs.trigger,
@@ -300,7 +296,7 @@ export function usePresence(context: EcloseContext): void {
 		if (!surface) return;
 		const hideTrigger = (m: Morph) => {
 			// Hidden while the surface is opaque above it, so nothing dips.
-			if (refs.trigger && !refs.flown) {
+			if (refs.trigger) {
 				refs.trigger.style.opacity = m.el.style.opacity === "1" ? "0" : "";
 			}
 		};
@@ -331,9 +327,7 @@ export function usePresence(context: EcloseContext): void {
 			const { trigger } = refs;
 			if (!morph) return;
 			if (controller.phase === "closing") {
-				if (trigger?.isConnected && !refs.flown) {
-					morph.retarget(pageBox(trigger));
-				}
+				if (trigger?.isConnected) morph.retarget(pageBox(trigger));
 			} else if (morph.running) {
 				morph.release();
 				placeContent(refs, live.current);
@@ -408,7 +402,7 @@ export function usePresence(context: EcloseContext): void {
 		if (settleNext.current) {
 			placeContent(refs, live.current);
 			controller.settle();
-			if (refs.trigger && !refs.flown) refs.trigger.style.opacity = "0";
+			if (refs.trigger) refs.trigger.style.opacity = "0";
 			focusTarget(refs)?.focus({ preventScroll: true });
 		} else {
 			controller.open();

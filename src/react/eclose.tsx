@@ -127,7 +127,7 @@ const Trigger = forwardRef<HTMLButtonElement, TriggerProps>(function Trigger(
 			if (!el) return;
 			refs.trigger = el;
 			// A replacement mounted while open shouldn't show through.
-			if (phase === "open" && !refs.flown) el.style.opacity = "0";
+			if (phase === "open") el.style.opacity = "0";
 		}) as Ref<never>,
 	);
 });

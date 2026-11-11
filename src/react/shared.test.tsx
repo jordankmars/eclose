@@ -30,11 +30,11 @@ describe("Eclose.Shared", () => {
 		expect($(".hero:not([style*='position'])").style.visibility).toBe("hidden");
 	});
 
-	it("leaves the trigger itself visible, since the cover is what travels", async () => {
+	it("hides the trigger behind the opaque surface", async () => {
 		render(<Card />);
 		click(trigger());
 		await settle();
-		expect(trigger().style.opacity).toBe("");
+		expect(trigger().style.opacity).toBe("0");
 	});
 
 	it("shows the real element on landing and keeps the source hidden", async () => {
