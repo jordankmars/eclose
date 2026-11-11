@@ -2,11 +2,11 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { configure } from "./config";
 import type { Box } from "./geometry";
-import { Morph } from "./morph";
+import { Morph, type MorphOptions } from "./morph";
 
 const REST = { x: 100, y: 200, w: 300, h: 400 };
 
-function surface(fade = false) {
+function surface(fade = false, align?: MorphOptions["align"]) {
 	const el = document.createElement("div");
 	el.style.paddingLeft = "12px";
 	el.style.paddingTop = "8px";
@@ -21,7 +21,11 @@ function surface(fade = false) {
 	inner.style.display = "contents";
 	el.append(inner);
 	document.body.append(el);
-	return { el, inner, m: new Morph(el, { mode: "surface", inner, fade }) };
+	return {
+		el,
+		inner,
+		m: new Morph(el, { mode: "surface", inner, fade, align }),
+	};
 }
 
 const box = (x: number, y: number, w: number, h: number): Box => ({
@@ -64,6 +68,13 @@ describe("surface mode", () => {
 		expect(inner.style.top).toBe("8px");
 		expect(inner.style.width).toBe("288px");
 		expect(inner.style.height).toBe("392px");
+		m.destroy();
+	});
+
+	it("keeps the content lined up with its alignment point", () => {
+		const { inner, m } = surface(false, () => ({ x: 0.5, y: 1 }));
+		m.go(box(0, 0, 100, 100), m.measure());
+		expect(inner.style.transform).toBe("translate(-100px, -300px)");
 		m.destroy();
 	});
 

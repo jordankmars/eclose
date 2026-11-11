@@ -11,6 +11,7 @@ import {
 	useSyncExternalStore,
 } from "react";
 import {
+	alignment,
 	Controller,
 	Flight,
 	inertOthers,
@@ -18,7 +19,9 @@ import {
 	type Layer,
 	lockScroll,
 	Morph,
+	type Origin,
 	type Phase,
+	type Point,
 	pageBox,
 	pageRect,
 	place,
@@ -53,6 +56,12 @@ export interface RootOptions {
 	onOpenChange?: (open: boolean) => void;
 	/** Where the content rests: on top of its trigger, or in the viewport center. */
 	placement?: "anchored" | "centered";
+	/**
+	 * The point of anchored content that sits on the same point of its trigger,
+	 * and stays still as it grows. Centered content ignores this and always
+	 * grows from its center. Default "center".
+	 */
+	origin?: Origin;
 	/** Trap focus, make the page inert and lock scroll. Centered defaults to on. */
 	modal?: boolean;
 	/** Swipe down to dismiss, on touch. Default true. */
@@ -120,18 +129,27 @@ function isModal({ modal, placement }: RootOptions): boolean {
 	return modal ?? placement === "centered";
 }
 
+function contentAlignment({ origin, placement }: RootOptions): Point {
+	return alignment(placement === "centered" ? "" : origin);
+}
+
 /** Puts anchored content in its resting place, over the trigger. */
 function placeContent(refs: Refs, options: RootOptions): void {
 	const { positioner, surface, trigger } = refs;
 	if (options.placement === "centered" || !positioner || !surface) return;
 	if (!trigger?.isConnected) return;
-	// Clearing first means the origin is correct whatever the portal sits inside.
+	// Clearing first means the base is correct whatever the portal sits inside.
 	positioner.style.transform = "";
 	// Until now it's fixed, so an autofocused child can't scroll the page to it.
 	positioner.style.position = "absolute";
-	const origin = pageRect(positioner);
-	const { x, y } = place(pageRect(trigger), pageRect(surface), viewport());
-	positioner.style.transform = `translate(${x - origin.x}px, ${y - origin.y}px)`;
+	const base = pageRect(positioner);
+	const { x, y } = place(
+		pageRect(trigger),
+		pageRect(surface),
+		viewport(),
+		contentAlignment(options),
+	);
+	positioner.style.transform = `translate(${x - base.x}px, ${y - base.y}px)`;
 }
 
 /** What takes focus on opening, or null if an `autoFocus` child already has it. */
@@ -289,6 +307,7 @@ export function usePresence(context: EcloseContext): void {
 		const morph = new Morph(surface, {
 			mode: "surface",
 			inner,
+			align: () => contentAlignment(live.current),
 			fade: true,
 			onFrame: (m) => {
 				hideTrigger(m.progress);
@@ -301,7 +320,7 @@ export function usePresence(context: EcloseContext): void {
 			refs.morph = null;
 			controller.reset();
 		};
-	}, [controller, refs]);
+	}, [controller, refs, live]);
 
 	// Runs for as long as the content is mounted, so a close keeps following too.
 	useIsoLayoutEffect(() => {

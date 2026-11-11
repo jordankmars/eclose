@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { act } from "react";
 import { describe, expect, it, vi } from "vitest";
+import type { Origin } from "../core";
 import { Morph } from "../core";
 import { Eclose } from "./eclose";
 import { click, dialog, render, resized, settle, trigger } from "./test-utils";
@@ -19,10 +20,13 @@ function stub() {
 	};
 }
 
-function Popover(props: { placement?: "anchored" | "centered" }) {
+function Popover(props: {
+	placement?: "anchored" | "centered";
+	origin?: Origin;
+}) {
 	return (
 		<div id="scroller">
-			<Eclose.Root {...props}>
+			<Eclose.Root origin="top-left" {...props}>
 				<Eclose.Trigger>Open</Eclose.Trigger>
 				<Eclose.Content>
 					<p>Body</p>
@@ -104,6 +108,43 @@ describe("anchored placement", () => {
 		act(() => resized());
 		surfaceRect.height = 300;
 		expect(positioner().style.transform).toBe("translate(100px, 8px)");
+	});
+});
+
+describe("origin", () => {
+	function openAt(origin: Origin | undefined) {
+		stub();
+		triggerRect.left = 400;
+		triggerRect.top = 400;
+		render(<Popover origin={origin} />);
+		click(trigger());
+		triggerRect.left = 100;
+		triggerRect.top = 100;
+		return positioner().style.transform;
+	}
+
+	it("grows from the center by default", () => {
+		stub();
+		triggerRect.left = 400;
+		triggerRect.top = 400;
+		render(
+			<Eclose.Root>
+				<Eclose.Trigger>Open</Eclose.Trigger>
+				<Eclose.Content>Body</Eclose.Content>
+			</Eclose.Root>,
+		);
+		click(trigger());
+		triggerRect.left = 100;
+		triggerRect.top = 100;
+		expect(positioner().style.transform).toBe("translate(340px, 265px)");
+	});
+
+	it("shares a corner with the trigger", () => {
+		expect(openAt("bottom-right")).toBe("translate(280px, 130px)");
+	});
+
+	it("shares a side with the trigger", () => {
+		expect(openAt("left")).toBe("translate(400px, 265px)");
 	});
 });
 

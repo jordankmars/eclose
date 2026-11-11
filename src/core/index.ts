@@ -1,6 +1,13 @@
 // Framework-agnostic core. Internal: not exported on its own.
 
-export { place, viewport, watch } from "./anchor";
+export {
+	alignment,
+	type Origin,
+	type Point,
+	place,
+	viewport,
+	watch,
+} from "./anchor";
 export { morph } from "./batch";
 export { configure, isReduced, type MotionConfig } from "./config";
 export { Controller, type ControllerOptions, type Phase } from "./controller";

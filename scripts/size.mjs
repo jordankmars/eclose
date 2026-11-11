@@ -5,7 +5,7 @@ import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { gzipSync } from "node:zlib";
 
-const BUDGET = 8500;
+const BUDGET = 8600;
 const DIST = "dist";
 
 const files = readdirSync(DIST, { recursive: true, encoding: "utf8" })

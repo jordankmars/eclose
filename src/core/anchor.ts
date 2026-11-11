@@ -8,6 +8,25 @@ export interface Point {
 	y: number;
 }
 
+/** The point of the content that sits on the same point of its trigger. */
+export type Origin =
+	| "center"
+	| "top"
+	| "right"
+	| "bottom"
+	| "left"
+	| "top-left"
+	| "top-right"
+	| "bottom-left"
+	| "bottom-right";
+
+/** An origin as a fraction of the box on each axis, from 0 to 1. */
+export function alignment(origin = ""): Point {
+	const at = (start: string, end: string) =>
+		origin.includes(start) ? 0 : origin.includes(end) ? 1 : 0.5;
+	return { x: at("left", "right"), y: at("top", "bottom") };
+}
+
 /** Keeps content this far from the viewport edge. */
 const GUTTER = 8;
 
@@ -17,27 +36,34 @@ function axis(
 	size: number,
 	viewStart: number,
 	viewSize: number,
+	align: number,
 ): number {
 	const min = viewStart + GUTTER;
 	const max = viewStart + viewSize - GUTTER - size;
-	const end = start + triggerSize - size;
-	// Overflowing past the far edge: line up the trigger's other edge instead.
-	const at = start > max && end >= min ? end : start;
-	return Math.max(min, Math.min(at, max));
+	const slack = triggerSize - size;
+	const clamp = (at: number) => Math.max(min, Math.min(at, max));
+	const wanted = start + slack * align;
+	const mirrored = start + slack * (1 - align);
+	// Overflowing: line up the trigger's other edge instead, if that fits.
+	return clamp(wanted) !== wanted && clamp(mirrored) === mirrored
+		? mirrored
+		: clamp(wanted);
 }
 
 /**
  * The top-left corner for content of `size` anchored to `trigger`, all in the
- * same coordinate space. Content bigger than the viewport pins to the start.
+ * same coordinate space. `align` is the point of each that lines up. Content
+ * bigger than the viewport pins to the start.
  */
 export function place(
 	trigger: Rect,
 	size: Pick<Rect, "w" | "h">,
 	view: Rect,
+	align: Point,
 ): Point {
 	return {
-		x: axis(trigger.x, trigger.w, size.w, view.x, view.w),
-		y: axis(trigger.y, trigger.h, size.h, view.y, view.h),
+		x: axis(trigger.x, trigger.w, size.w, view.x, view.w, align.x),
+		y: axis(trigger.y, trigger.h, size.h, view.y, view.h, align.y),
 	};
 }
 
