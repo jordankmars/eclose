@@ -439,16 +439,14 @@ export class Morph implements Animated {
 		st.marginRight = `${(rest?.marginRight ?? 0) + layout.w - width}px`;
 		st.marginBottom = `${(rest?.marginBottom ?? 0) + layout.h - height}px`;
 		st.borderRadius = `${Math.max(0, Math.min(r, width / 2, height / 2))}px`;
-		const { align, inner } = this.options;
-		if (align && inner && rest && this.frozen) {
-			const a = align();
-			inner.style.left = `${rest.padLeft + a.x * (width - layout.w)}px`;
-			inner.style.top = `${rest.padTop - this.scrollTop + a.y * (height - layout.h)}px`;
+		const inner = this.options.inner;
+		const a = this.options.align?.();
+		if (a && inner) {
+			inner.style.transform = `translate(${a.x * (width - layout.w)}px, ${a.y * (height - layout.h)}px)`;
 		}
 		if (this.options.fade) {
 			// The box arrives first, then the content inside it.
 			st.opacity = `${unit(this.progress / 25)}`;
-			const inner = this.options.inner;
 			if (inner) inner.style.opacity = `${unit((this.progress - 15) / 35)}`;
 		}
 	}

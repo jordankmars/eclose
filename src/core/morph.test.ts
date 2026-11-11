@@ -74,8 +74,7 @@ describe("surface mode", () => {
 	it("keeps the content lined up with its alignment point", () => {
 		const { inner, m } = surface(false, () => ({ x: 0.5, y: 1 }));
 		m.go(box(0, 0, 100, 100), m.measure());
-		expect(inner.style.left).toBe("-88px");
-		expect(inner.style.top).toBe("-292px");
+		expect(inner.style.transform).toBe("translate(-100px, -300px)");
 		m.destroy();
 	});
 
