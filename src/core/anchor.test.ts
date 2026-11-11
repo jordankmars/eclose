@@ -4,32 +4,36 @@ import { alignment, place, watch } from "./anchor";
 
 const view = { x: 0, y: 0, w: 1000, h: 800 };
 const size = { w: 200, h: 300 };
+const topLeft = { x: 0, y: 0 };
 
 describe("place", () => {
 	it("rests on top of the trigger when there's room", () => {
 		const trigger = { x: 100, y: 100, w: 80, h: 32 };
-		expect(place(trigger, size, view)).toEqual({ x: 100, y: 100 });
+		expect(place(trigger, size, view, topLeft)).toEqual({ x: 100, y: 100 });
 	});
 
 	it("lines up the far edge when it would overflow", () => {
 		const trigger = { x: 900, y: 700, w: 80, h: 32 };
-		expect(place(trigger, size, view)).toEqual({ x: 780, y: 432 });
+		expect(place(trigger, size, view, topLeft)).toEqual({ x: 780, y: 432 });
 	});
 
 	it("clamps into the viewport when neither edge fits", () => {
 		const trigger = { x: -50, y: 10, w: 10, h: 10 };
-		expect(place(trigger, size, view).x).toBe(8);
+		expect(place(trigger, size, view, topLeft).x).toBe(8);
 	});
 
 	it("pins oversized content to the start", () => {
 		const trigger = { x: 500, y: 500, w: 80, h: 32 };
-		expect(place(trigger, { w: 1200, h: 900 }, view)).toEqual({ x: 8, y: 8 });
+		expect(place(trigger, { w: 1200, h: 900 }, view, topLeft)).toEqual({
+			x: 8,
+			y: 8,
+		});
 	});
 
 	it("works in page coordinates when the page is scrolled", () => {
 		const scrolled = { ...view, y: 2000 };
 		const trigger = { x: 100, y: 2700, w: 80, h: 32 };
-		expect(place(trigger, size, scrolled).y).toBe(2432);
+		expect(place(trigger, size, scrolled, topLeft).y).toBe(2432);
 	});
 
 	it("shares a center with the trigger", () => {

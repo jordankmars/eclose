@@ -21,7 +21,7 @@ export type Origin =
 	| "bottom-right";
 
 /** An origin as a fraction of the box on each axis, from 0 to 1. */
-export function alignment(origin: Origin = "center"): Point {
+export function alignment(origin = ""): Point {
 	const at = (start: string, end: string) =>
 		origin.includes(start) ? 0 : origin.includes(end) ? 1 : 0.5;
 	return { x: at("left", "right"), y: at("top", "bottom") };
@@ -41,26 +41,25 @@ function axis(
 	const min = viewStart + GUTTER;
 	const max = viewStart + viewSize - GUTTER - size;
 	const slack = triggerSize - size;
+	const clamp = (at: number) => Math.max(min, Math.min(at, max));
 	const wanted = start + slack * align;
 	const mirrored = start + slack * (1 - align);
 	// Overflowing: line up the trigger's other edge instead, if that fits.
-	const at =
-		(wanted < min || wanted > max) && mirrored >= min && mirrored <= max
-			? mirrored
-			: wanted;
-	return Math.max(min, Math.min(at, max));
+	return clamp(wanted) !== wanted && clamp(mirrored) === mirrored
+		? mirrored
+		: clamp(wanted);
 }
 
 /**
  * The top-left corner for content of `size` anchored to `trigger`, all in the
- * same coordinate space. `align` is the point of each that lines up, and
- * defaults to their top-left. Content bigger than the viewport pins to the start.
+ * same coordinate space. `align` is the point of each that lines up. Content
+ * bigger than the viewport pins to the start.
  */
 export function place(
 	trigger: Rect,
 	size: Pick<Rect, "w" | "h">,
 	view: Rect,
-	align: Point = { x: 0, y: 0 },
+	align: Point,
 ): Point {
 	return {
 		x: axis(trigger.x, trigger.w, size.w, view.x, view.w, align.x),

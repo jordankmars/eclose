@@ -1,4 +1,5 @@
 // React adapter. Published as eclose/react.
+export type { Origin } from "../core";
 export {
 	type CloseProps,
 	type ContentProps,
