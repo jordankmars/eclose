@@ -13,6 +13,8 @@ import {
 import {
 	alignment,
 	Controller,
+	clipOut,
+	covering,
 	Flight,
 	inertOthers,
 	isTop,
@@ -80,6 +82,8 @@ interface Refs {
 	morph: Morph | null;
 	layer: Layer | null;
 	initialFocus: RefObject<HTMLElement | null> | undefined;
+	/** Fixed or sticky elements over the trigger, found as the motion starts. */
+	bars: Element[];
 }
 
 /** One `Eclose.Shared` id: its element on the trigger's side and in the content. */
@@ -150,6 +154,26 @@ function placeContent(refs: Refs, options: RootOptions): void {
 	positioner.style.transform = `translate(${x - base.x}px, ${y - base.y}px)`;
 }
 
+/**
+ * Keeps travelling layers under the bars over the trigger. A bar the content
+ * rests on is left out, or the content would be cut until it settled.
+ */
+function clipLayers(refs: Refs, bars: Element[]): void {
+	const rest = refs.morph?.atRest;
+	const clear = bars.filter((bar) => {
+		const { x, y, w, h } = pageRect(bar);
+		return (
+			!rest ||
+			x >= rest.x + rest.w ||
+			rest.x >= x + w ||
+			y >= rest.y + rest.h ||
+			rest.y >= y + h
+		);
+	});
+	clipOut(refs.positioner, clear);
+	clipOut(refs.flightLayer, clear);
+}
+
 /** What takes focus on opening, or null if an `autoFocus` child already has it. */
 function focusTarget({ surface, initialFocus }: Refs): HTMLElement | null {
 	if (!surface) return null;
@@ -189,6 +213,7 @@ export function useRoot(options: RootOptions): EcloseContext {
 		morph: null,
 		layer: null,
 		initialFocus: undefined,
+		bars: [],
 	}).current;
 	const shared = useRef(new Map<string, SharedPair>()).current;
 
@@ -222,9 +247,11 @@ export function useRoot(options: RootOptions): EcloseContext {
 		surface: () => refs.surface,
 		source: () => (refs.trigger?.isConnected ? refs.trigger : null),
 		initialFocus: () => focusTarget(refs),
+		onLaunch: () => clipLayers(refs, refs.bars),
 		onPhase: (next) => {
 			setPhase(next);
 			refs.surface?.toggleAttribute("inert", next === "closing");
+			if (next === "open" || next === "closed") clipLayers(refs, []);
 			if (next === "open" && refs.overlay) refs.overlay.style.opacity = "";
 			if (next === "closed" && refs.trigger) refs.trigger.style.opacity = "";
 		},
@@ -335,6 +362,7 @@ export function usePresence(context: EcloseContext): void {
 			} else if (!morph.held) {
 				placeContent(refs, live.current);
 			}
+			if (controller.phase.endsWith("ing")) clipLayers(refs, refs.bars);
 		};
 		const stopWatching = watch(() => refs.trigger, follow);
 
@@ -353,6 +381,12 @@ export function usePresence(context: EcloseContext): void {
 	}, [controller, refs, live]);
 
 	useIsoLayoutEffect(() => {
+		// Here because a modal's page is inert from below, and can't be hit tested.
+		const { trigger } = refs;
+		refs.bars =
+			live.current.placement === "centered" && trigger?.isConnected
+				? covering(trigger)
+				: [];
 		if (!open) {
 			settleNext.current = false;
 			// Not in the cleanup: React puts focus back after running those, and

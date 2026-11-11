@@ -30,6 +30,9 @@ class FakeResizeObserver {
 globalThis.ResizeObserver =
 	FakeResizeObserver as unknown as typeof ResizeObserver;
 
+/** jsdom has no hit testing, so nothing covers anything unless a test says so. */
+document.elementsFromPoint = () => [];
+
 export function resized(): void {
 	for (const fire of observers) fire();
 }
