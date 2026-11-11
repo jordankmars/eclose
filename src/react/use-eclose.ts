@@ -298,10 +298,10 @@ export function usePresence(context: EcloseContext): void {
 	useIsoLayoutEffect(() => {
 		const { surface, inner } = refs;
 		if (!surface) return;
-		const hideTrigger = (progress: number) => {
-			// Hidden once the surface is opaque above it, so nothing dips.
+		const hideTrigger = (m: Morph) => {
+			// Hidden while the surface is opaque above it, so nothing dips.
 			if (refs.trigger && !refs.flown) {
-				refs.trigger.style.opacity = progress >= 25 ? "0" : "";
+				refs.trigger.style.opacity = m.el.style.opacity === "1" ? "0" : "";
 			}
 		};
 		const morph = new Morph(surface, {
@@ -310,7 +310,7 @@ export function usePresence(context: EcloseContext): void {
 			align: () => contentAlignment(live.current),
 			fade: true,
 			onFrame: (m) => {
-				hideTrigger(m.progress);
+				hideTrigger(m);
 				if (refs.overlay) refs.overlay.style.opacity = `${m.progress / 100}`;
 			},
 		});
