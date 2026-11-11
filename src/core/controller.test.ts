@@ -140,11 +140,22 @@ describe("Controller with flights", () => {
 		return { ...s, dest, src, flight: () => flight };
 	}
 
-	it("keeps the surface still and only fades it", () => {
+	it("grows the surface from its source", () => {
 		const { c, morph, surface } = withFlight();
 		c.open();
-		expect(surface.style.width).toBe("300px");
+		expect(surface.style.width).toBe("80px");
 		expect(surface.style.opacity).toBe("0");
+		morph.destroy();
+		c.reset();
+	});
+
+	it("takes the surface back to its source", async () => {
+		const { c, morph, surface } = withFlight();
+		c.open();
+		await vi.waitFor(() => expect(c.phase).toBe("open"), { timeout: 4000 });
+		c.close();
+		run(morph);
+		expect(Number.parseFloat(surface.style.width)).toBeCloseTo(80, 0);
 		morph.destroy();
 		c.reset();
 	});

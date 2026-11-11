@@ -30,7 +30,7 @@ export interface ControllerOptions {
 	layout?: () => void;
 	/**
 	 * Shared elements that travel on their own, read each time it opens from
-	 * closed. With any of these the surface stays put and only fades.
+	 * closed. They fly above the surface as it grows from the source.
 	 */
 	flights?: () => Flight[];
 }
@@ -66,9 +66,8 @@ export class Controller {
 
 		const wasClosed = this.phase === "closed";
 		if (wasClosed) this.flying = flights?.() ?? [];
-		const flown = this.flying.length > 0;
 		const shared = source !== undefined;
-		const origin = shared && wasClosed && !flown ? source() : null;
+		const origin = shared && wasClosed ? source() : null;
 		const from = origin ? pageBox(origin) : m.now();
 		m.release();
 		if (!shared || wasClosed) commit(true);
@@ -80,7 +79,7 @@ export class Controller {
 		this.set("opening");
 		const done = latch(1 + this.flying.length, () => this.set("open"));
 		for (const f of this.flying) f.fly(true, done);
-		m.go(wasClosed && flown ? to : from, to, done);
+		m.go(from, to, done);
 		initialFocus?.()?.focus({ preventScroll: true });
 	}
 
@@ -95,9 +94,7 @@ export class Controller {
 			const done = latch(1 + this.flying.length, () => this.land());
 			for (const f of this.flying) f.fly(false, done);
 			const origin = source();
-			if (this.flying.length) {
-				m.to(m.now(), done);
-			} else if (origin) {
+			if (origin) {
 				m.to(pageBox(origin), done);
 			} else if (m.options.mode === "surface") {
 				m.to(shrunk(m.now()), done);
