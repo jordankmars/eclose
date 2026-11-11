@@ -1,0 +1,101 @@
+export const metadata = { title: "API" };
+
+# API
+
+<Lead>The parts of eclose and the props they take.</Lead>
+
+## Anatomy
+
+Import `Eclose` and put the parts together.
+
+```tsx
+import { Eclose } from "eclose/react";
+
+<Eclose.Root>
+	<Eclose.Trigger />
+	<Eclose.Overlay />
+	<Eclose.Content>
+		<Eclose.Title />
+		<Eclose.Description />
+		<Eclose.Shared id="cover" />
+		<Eclose.Close />
+	</Eclose.Content>
+</Eclose.Root>;
+```
+
+## Components
+
+### Root
+
+Holds the state. It renders nothing of its own.
+
+| Prop | Type | Default |
+| --- | --- | --- |
+| `open` | `boolean` | - |
+| `defaultOpen` | `boolean` | `false` |
+| `onOpenChange` | `(open: boolean) => void` | - |
+| `placement` | `"anchored" \| "centered"` | `"anchored"` |
+| `origin` | `Origin` | `"center"` |
+| `modal` | `boolean` | `true` when centered |
+| `swipe` | `boolean` | `true` |
+| `container` | `HTMLElement \| null` | `document.body` |
+
+`Origin` is `"center"`, a side (`"top"`, `"right"`, `"bottom"`, `"left"`) or a corner (`"top-left"`, `"top-right"`, `"bottom-left"`, `"bottom-right"`). See [Origin](/docs/origin).
+
+`modal` traps focus, makes the page inert and locks scroll.
+
+### Trigger
+
+The button that opens the content. Takes button props.
+
+| Prop | Type | Default |
+| --- | --- | --- |
+| `asChild` | `boolean` | `false` |
+
+### Content
+
+The surface that grows. Takes div props. Focus goes to `initialFocus`, then an `autoFocus` child, then the dialog itself.
+
+| Prop | Type | Default |
+| --- | --- | --- |
+| `initialFocus` | `RefObject<HTMLElement \| null>` | - |
+
+### Overlay
+
+A full-screen layer behind the content. Takes div props. You color it, and it fades on its own.
+
+### Close
+
+A button that closes the content. Takes button props, and shows `×` if it has no children.
+
+| Prop | Type | Default |
+| --- | --- | --- |
+| `asChild` | `boolean` | `false` |
+
+### Title
+
+Labels the dialog for assistive technology. Renders an `h2`.
+
+### Description
+
+Describes the dialog for assistive technology. Renders a `p`.
+
+### Shared
+
+An element that flies between the trigger and the content. Put one with the same `id` on each side. A copy does the flying, so keep it for media-like elements.
+
+| Prop | Type | Default |
+| --- | --- | --- |
+| `id` | `string` | Required |
+| `asChild` | `boolean` | `false` |
+
+## Swipe
+
+On touch, dragging down dismisses. Inside a scroller, it only takes over from the top. Pass `swipe={false}` to turn it off, or mark an element with `data-eclose-no-swipe` to exempt it.
+
+## Good to know
+
+- Portals sit at `z-index: 9999`. Set `--eclose-z` to change that.
+- A trigger's position is followed through scrolling and resizing, but not through a CSS transform animating on its parent mid-morph.
+- Don't pass a `container` that's scaled. Translated is fine.
+- With reduced motion, everything becomes a fade.
