@@ -30,7 +30,7 @@ eclose ships no CSS. Style the parts with your own classes, and the motion takes
 
 | Part                                 | Props                                                                                                  |
 | ------------------------------------ | ------------------------------------------------------------------------------------------------------ |
-| `Eclose.Root`                        | `open`, `defaultOpen`, `onOpenChange`, `placement`, `modal`, `swipe`, `container`                      |
+| `Eclose.Root`                        | `open`, `defaultOpen`, `onOpenChange`, `placement`, `origin`, `modal`, `swipe`, `container`            |
 | `Eclose.Trigger`, `Eclose.Close`     | `asChild`, plus button props                                                                           |
 | `Eclose.Content`                     | `initialFocus` ref, plus div props. Without it, focus goes to an `autoFocus` child, or else the dialog |
 | `Eclose.Shared`                      | `id` (required), `asChild`                                                                             |
@@ -44,6 +44,12 @@ Every part also has `data-state`: `closed`, `opening`, `open` or `closing`.
 `placement="anchored"` is the default. The content rests on top of its trigger, follows it as it moves, and stays usable alongside the page. Set `modal` to opt in to focus trapping, an inert page and scroll lock.
 
 `placement="centered"` puts it in the middle of the viewport, and is modal unless you set `modal={false}`.
+
+### Origin
+
+`origin` sets the point anchored content grows from. That point of the content sits on the same point of the trigger and stays still while the rest grows away from it. It's `center` by default, and can be a side (`top`, `right`, `bottom`, `left`) or a corner (`top-left`, `top-right`, `bottom-left`, `bottom-right`).
+
+Near a viewport edge, it lines up the trigger's other edge if that fits, and otherwise stays on screen. Centered content ignores `origin` and always grows from its center.
 
 ### Shared elements
 
