@@ -1,19 +1,53 @@
-export const metadata = { title: "Hello World" };
+import { Example } from "@/components/example";
 
-# Hello World
+export const metadata = { title: "Getting Started" };
 
-Welcome to the eclose docs. eclose is a dialog or popover that grows out of its trigger: a card becomes a detail view, a button becomes a menu, a pill becomes a panel.
+# Getting Started
 
-There's more to come. For now, here's the smallest one you can make:
+<Lead>A dialog or popover that grows out of its trigger.</Lead>
+
+A card becomes a detail view, a button becomes a menu, a pill becomes a panel. It's live DOM, every morph can be interrupted, and it dismisses with a swipe.
+
+<Example name="popover" />
+
+## Installation
+
+Install the package from your command line.
+
+<Install />
+
+## Create an Eclose
+
+Compose the parts. The content stays out of the page until its trigger opens it.
+
+<CodeFile name="share.tsx">
 
 ```tsx
 import { Eclose } from "eclose/react";
 
-<Eclose.Root>
-	<Eclose.Trigger>Share</Eclose.Trigger>
-	<Eclose.Content>
-		<Eclose.Title>Share this</Eclose.Title>
-		<Eclose.Close />
-	</Eclose.Content>
-</Eclose.Root>;
+export function Share() {
+	return (
+		<Eclose.Root>
+			<Eclose.Trigger>Share</Eclose.Trigger>
+			<Eclose.Content>
+				<Eclose.Title>Share this</Eclose.Title>
+				<Eclose.Close />
+			</Eclose.Content>
+		</Eclose.Root>
+	);
+}
 ```
+
+</CodeFile>
+
+## Style it
+
+eclose ships no CSS. Style the parts with your own classes, and the motion takes care of itself.
+
+```tsx
+<Eclose.Content className="w-60 rounded-2xl bg-white p-2 shadow-lg">
+	{/* ... */}
+</Eclose.Content>
+```
+
+Every part has a `data-state` of `closed`, `opening`, `open` or `closing` to style against. Don't put a CSS `transition` on `Eclose.Content`, as it fights the per-frame updates.
