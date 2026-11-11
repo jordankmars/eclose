@@ -15,7 +15,10 @@ export const SECTIONS = [
 	},
 	{
 		title: "Examples",
-		pages: [{ title: "Anchored", href: "/docs/examples/anchored" }],
+		pages: [
+			{ title: "Anchored", href: "/docs/examples/anchored" },
+			{ title: "Dialogs", href: "/docs/examples/dialogs" },
+		],
 	},
 ];
 
