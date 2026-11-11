@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { StrictMode, useState } from "react";
 import { describe, expect, it, vi } from "vitest";
+import { Morph } from "../core";
 import { Eclose } from "./eclose";
 import { click, dialog, render, settle, trigger } from "./test-utils";
 
@@ -63,6 +64,21 @@ describe("open and close", () => {
 		click(dialog().querySelector("button") as Element);
 		await settle();
 		expect(trigger().style.opacity).toBe("");
+	});
+
+	it("keeps the trigger hidden until the surface starts to fade", async () => {
+		render(<Basic />);
+		click(trigger());
+		await settle();
+		const to = vi.spyOn(Morph.prototype, "to");
+		click(dialog().querySelector("button") as Element);
+		const morph = to.mock.contexts[0] as Morph;
+		while (morph.progress > 20) morph.step(1 / 240);
+		expect(trigger().style.opacity).toBe("0");
+		while (morph.progress > 3) morph.step(1 / 240);
+		expect(trigger().style.opacity).toBe("");
+		to.mockRestore();
+		await settle();
 	});
 
 	it("can be caught on the way out", async () => {

@@ -129,6 +129,32 @@ describe("surface mode", () => {
 		m.destroy();
 	});
 
+	const open = (m: Morph) => {
+		m.go(box(0, 0, 10, 10), m.measure());
+		for (let i = 0; i < 120 && m.running; i++) m.step(1 / 60);
+	};
+
+	it("stays whole on the way home, then fades on arrival", () => {
+		const { el, m } = surface(true);
+		open(m);
+		m.to(box(0, 0, 10, 10));
+		while (m.progress > 8) m.step(1 / 240);
+		expect(el.style.opacity).toBe("1");
+		while (m.progress > 1) m.step(1 / 240);
+		expect(Number(el.style.opacity)).toBeLessThan(0.05);
+		m.destroy();
+	});
+
+	it("doesn't pop when caught before it's opaque", () => {
+		const { el, m } = surface(true);
+		m.go(box(0, 0, 10, 10), m.measure());
+		while (m.progress < 10) m.step(1 / 240);
+		const before = Number(el.style.opacity);
+		m.to(box(0, 0, 10, 10));
+		expect(Number(el.style.opacity)).toBeCloseTo(before);
+		m.destroy();
+	});
+
 	it("still animates reduced motion: no travel, an async fade", () => {
 		configure({ reduced: true });
 		const { el, m } = surface(true);

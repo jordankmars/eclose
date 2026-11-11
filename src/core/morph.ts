@@ -127,6 +127,8 @@ export class Morph implements Animated {
 	// Surface mode only: how far open it is, 0 to 100. A spring of its own
 	// because a surface that doesn't travel still has to fade.
 	private fader: SpringState | null = null;
+	/** Has been fully opaque this flight, so it only fades near the trigger. */
+	private whole = false;
 	private rest: SurfaceRest | null = null;
 	private surfaceStyles: string[] = [];
 	private innerCss = "";
@@ -224,7 +226,10 @@ export class Morph implements Animated {
 			this.freeze();
 			const f = this.fader;
 			if (this.running && f) f.to = fadeTo;
-			else this.fader = { x: 100 - fadeTo, v: 0, to: fadeTo };
+			else {
+				this.fader = { x: 100 - fadeTo, v: 0, to: fadeTo };
+				this.whole = !fadeTo;
+			}
 		}
 		if (this.running && this.springs && this.options.handoff !== false) {
 			for (const k of BOX_KEYS) this.springs[k].to = to[k];
@@ -445,8 +450,11 @@ export class Morph implements Animated {
 			inner.style.transform = `translate(${a.x * (width - layout.w)}px, ${a.y * (height - layout.h)}px)`;
 		}
 		if (this.options.fade) {
-			// The box arrives first, then the content inside it.
-			st.opacity = `${unit(this.progress / 25)}`;
+			// The box arrives first, then the content inside it. Going home it stays
+			// whole until it's back on the trigger, as a spring's tail is slow.
+			const p = this.progress;
+			this.whole ||= p >= 25;
+			st.opacity = `${unit(this.whole ? (p - 1) / 5 : p / 25)}`;
 			if (inner) inner.style.opacity = `${unit((this.progress - 15) / 35)}`;
 		}
 	}
