@@ -2,7 +2,9 @@ import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { highlight } from "@/lib/highlight";
 import { ExampleTabs } from "./example-tabs";
+import { Pill } from "./examples/pill";
 import { Popover } from "./examples/popover";
+import { SearchField } from "./examples/search-field";
 import { StyleBrutalist } from "./examples/style-brutalist";
 import { StyleGlass } from "./examples/style-glass";
 import { StyleSite } from "./examples/style-site";
@@ -16,6 +18,8 @@ const DEMOS = {
 	"style-brutalist": StyleBrutalist,
 	"style-terminal": StyleTerminal,
 	"style-soft": StyleSoft,
+	pill: Pill,
+	"search-field": SearchField,
 };
 
 /** Runs `components/examples/<name>.tsx` and shows that same file as its code. */

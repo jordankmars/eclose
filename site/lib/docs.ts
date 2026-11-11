@@ -13,6 +13,10 @@ export const SECTIONS = [
 			{ title: "Styling", href: "/docs/styling" },
 		],
 	},
+	{
+		title: "Examples",
+		pages: [{ title: "Anchored", href: "/docs/examples/anchored" }],
+	},
 ];
 
 export const DOCS = SECTIONS.flatMap((section) => section.pages);
