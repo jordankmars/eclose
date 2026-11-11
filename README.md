@@ -53,7 +53,7 @@ Near a viewport edge, it lines up the trigger's other edge if that fits, and oth
 
 ### Shared elements
 
-Put an `Eclose.Shared` with the same `id` on each side, and that element flies across on its own while the surface fades around it.
+Put an `Eclose.Shared` with the same `id` on each side, and that element flies across on its own while the surface grows around it.
 
 ```tsx
 <Eclose.Root placement="centered">

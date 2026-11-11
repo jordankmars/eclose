@@ -123,10 +123,15 @@ export class Morph implements Animated {
 	private layout: Rect = { x: 0, y: 0, w: 0, h: 0 };
 	private done: (() => void) | null = null;
 	private hold = false;
-	private atRest: Box | null = null;
+	/** Its own layout box, as last measured. */
+	atRest: Box | null = null;
 	// Surface mode only: how far open it is, 0 to 100. A spring of its own
 	// because a surface that doesn't travel still has to fade.
 	private fader: SpringState | null = null;
+	/** Barely moves, so the fade is all there is to see. */
+	private still = false;
+	/** Has been fully opaque this flight, so it only fades near the trigger. */
+	private whole = false;
 	private rest: SurfaceRest | null = null;
 	private surfaceStyles: string[] = [];
 	private innerCss = "";
@@ -224,7 +229,18 @@ export class Morph implements Animated {
 			this.freeze();
 			const f = this.fader;
 			if (this.running && f) f.to = fadeTo;
-			else this.fader = { x: 100 - fadeTo, v: 0, to: fadeTo };
+			else {
+				this.fader = { x: 100 - fadeTo, v: 0, to: fadeTo };
+				this.whole = !fadeTo;
+				this.still =
+					Math.hypot(
+						to.x - from.x,
+						to.y - from.y,
+						to.w - from.w,
+						to.h - from.h,
+					) <
+					(from.w + from.h) * 0.2;
+			}
 		}
 		if (this.running && this.springs && this.options.handoff !== false) {
 			for (const k of BOX_KEYS) this.springs[k].to = to[k];
@@ -445,8 +461,13 @@ export class Morph implements Animated {
 			inner.style.transform = `translate(${a.x * (width - layout.w)}px, ${a.y * (height - layout.h)}px)`;
 		}
 		if (this.options.fade) {
-			// The box arrives first, then the content inside it.
-			st.opacity = `${unit(this.progress / 25)}`;
+			// The box arrives first, then the content inside it. Going home it stays
+			// whole until it's back on the trigger, as a spring's tail is slow.
+			const p = this.progress;
+			this.whole ||= p >= 25;
+			st.opacity = `${unit(
+				this.still ? (p - 5) / 60 : this.whole ? (p - 1) / 5 : p / 25,
+			)}`;
 			if (inner) inner.style.opacity = `${unit((this.progress - 15) / 35)}`;
 		}
 	}
