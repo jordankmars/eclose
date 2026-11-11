@@ -1,3 +1,4 @@
+import type { Point } from "./anchor";
 import { config, isReduced } from "./config";
 import { type Animated, track, untrack } from "./frame";
 import {
@@ -102,6 +103,11 @@ export interface MorphOptions {
 	 * and is owned by the morph while it flies.
 	 */
 	inner?: HTMLElement | null;
+	/**
+	 * Surface mode: the point of the box the content stays lined up with as it
+	 * grows, as a fraction on each axis. Default its top-left.
+	 */
+	align?: () => Point;
 	/** Surface mode: fade the surface and its content with the motion. */
 	fade?: boolean;
 	/** Called after every applied frame. */
@@ -433,6 +439,12 @@ export class Morph implements Animated {
 		st.marginRight = `${(rest?.marginRight ?? 0) + layout.w - width}px`;
 		st.marginBottom = `${(rest?.marginBottom ?? 0) + layout.h - height}px`;
 		st.borderRadius = `${Math.max(0, Math.min(r, width / 2, height / 2))}px`;
+		const { align, inner } = this.options;
+		if (align && inner && rest && this.frozen) {
+			const a = align();
+			inner.style.left = `${rest.padLeft + a.x * (width - layout.w)}px`;
+			inner.style.top = `${rest.padTop - this.scrollTop + a.y * (height - layout.h)}px`;
+		}
 		if (this.options.fade) {
 			// The box arrives first, then the content inside it.
 			st.opacity = `${unit(this.progress / 25)}`;
