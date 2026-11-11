@@ -155,6 +155,17 @@ describe("surface mode", () => {
 		m.destroy();
 	});
 
+	it("fades slowly when the box stays where it is", () => {
+		const { el, m } = surface(true);
+		const to = m.measure();
+		m.go(to, to);
+		while (m.progress < 30) m.step(1 / 240);
+		expect(Number(el.style.opacity)).toBeLessThan(0.5);
+		while (m.progress < 70) m.step(1 / 240);
+		expect(el.style.opacity).toBe("1");
+		m.destroy();
+	});
+
 	it("still animates reduced motion: no travel, an async fade", () => {
 		configure({ reduced: true });
 		const { el, m } = surface(true);

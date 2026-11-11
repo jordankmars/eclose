@@ -127,6 +127,8 @@ export class Morph implements Animated {
 	// Surface mode only: how far open it is, 0 to 100. A spring of its own
 	// because a surface that doesn't travel still has to fade.
 	private fader: SpringState | null = null;
+	/** Barely moves, so the fade is all there is to see. */
+	private still = false;
 	/** Has been fully opaque this flight, so it only fades near the trigger. */
 	private whole = false;
 	private rest: SurfaceRest | null = null;
@@ -229,6 +231,14 @@ export class Morph implements Animated {
 			else {
 				this.fader = { x: 100 - fadeTo, v: 0, to: fadeTo };
 				this.whole = !fadeTo;
+				this.still =
+					Math.hypot(
+						to.x - from.x,
+						to.y - from.y,
+						to.w - from.w,
+						to.h - from.h,
+					) <
+					(from.w + from.h) * 0.2;
 			}
 		}
 		if (this.running && this.springs && this.options.handoff !== false) {
@@ -454,7 +464,9 @@ export class Morph implements Animated {
 			// whole until it's back on the trigger, as a spring's tail is slow.
 			const p = this.progress;
 			this.whole ||= p >= 25;
-			st.opacity = `${unit(this.whole ? (p - 1) / 5 : p / 25)}`;
+			st.opacity = `${unit(
+				this.still ? (p - 5) / 60 : this.whole ? (p - 1) / 5 : p / 25,
+			)}`;
 			if (inner) inner.style.opacity = `${unit((this.progress - 15) / 35)}`;
 		}
 	}
