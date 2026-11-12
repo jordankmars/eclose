@@ -1,8 +1,13 @@
 # eclose
 
+[![CI](https://github.com/jordankmars/eclose/actions/workflows/ci.yml/badge.svg)](https://github.com/jordankmars/eclose/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
+
 > A dialog or popover that grows out of its trigger.
 
 A card becomes a detail view, a button becomes a menu, a pill becomes a panel. It's live DOM, every morph can be interrupted, and it dismisses with a swipe.
+
+It's about 9 kB gzipped, with no dependencies beyond React.
 
 ## Installation
 
