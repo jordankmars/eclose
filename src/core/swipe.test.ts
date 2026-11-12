@@ -133,7 +133,7 @@ describe("swipe", () => {
 	it("leaves opted-out elements to themselves", () => {
 		const { el, off } = setup();
 		const slider = document.createElement("div");
-		slider.setAttribute("data-eclose-no-swipe", "");
+		slider.setAttribute("data-eclosion-no-swipe", "");
 		el.append(slider);
 		finger("touchstart", slider, 100);
 		expect(finger("touchmove", slider, 150, 10).defaultPrevented).toBe(false);

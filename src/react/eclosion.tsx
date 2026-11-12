@@ -15,16 +15,16 @@ import {
 } from "react";
 import { createPortal } from "react-dom";
 import {
-	EcloseProvider,
+	EclosionProvider,
 	InContent,
 	ParentPortalProvider,
 	type RootOptions,
 	type SharedPair,
-	useEclose,
+	useEclosion,
 	useIsoLayoutEffect,
 	usePresence,
 	useRoot,
-} from "./use-eclose";
+} from "./use-eclosion";
 
 type Props = Record<string, unknown>;
 
@@ -86,9 +86,9 @@ export interface RootProps extends RootOptions {
 
 function Root({ children, ...options }: RootProps) {
 	return (
-		<EcloseProvider value={useRoot(options)}>
+		<EclosionProvider value={useRoot(options)}>
 			<InContent.Provider value={false}>{children}</InContent.Provider>
-		</EcloseProvider>
+		</EclosionProvider>
 	);
 }
 
@@ -105,7 +105,7 @@ const Trigger = forwardRef<HTMLButtonElement, TriggerProps>(function Trigger(
 	{ asChild, onClick, ...props },
 	ref,
 ) {
-	const { open, phase, request, refs, contentId, present } = useEclose();
+	const { open, phase, request, refs, contentId, present } = useEclosion();
 	const handleClick = (e: MouseEvent<HTMLButtonElement>) => {
 		onClick?.(e);
 		if (!e.defaultPrevented) request(!open);
@@ -138,7 +138,7 @@ const Close = forwardRef<HTMLButtonElement, CloseProps>(function Close(
 	{ asChild, onClick, children, ...props },
 	ref,
 ) {
-	const { phase, request } = useEclose();
+	const { phase, request } = useEclosion();
 	const handleClick = (e: MouseEvent<HTMLButtonElement>) => {
 		onClick?.(e);
 		if (!e.defaultPrevented) request(false);
@@ -189,7 +189,7 @@ const ANCHORED: CSSProperties = {
 };
 
 function Presence() {
-	usePresence(useEclose());
+	usePresence(useEclosion());
 	return null;
 }
 
@@ -197,7 +197,7 @@ const Content = forwardRef<HTMLDivElement, ContentProps>(function Content(
 	{ children, style, initialFocus, ...props },
 	ref,
 ) {
-	const context = useEclose();
+	const context = useEclosion();
 	const { present, portal, phase, refs, contentId, modal, centered } = context;
 	refs.initialFocus = initialFocus;
 	if (!present || !portal) return null;
@@ -254,7 +254,7 @@ const Overlay = forwardRef<HTMLDivElement, OverlayProps>(function Overlay(
 	{ style, ...props },
 	ref,
 ) {
-	const { present, portal, phase, refs } = useEclose();
+	const { present, portal, phase, refs } = useEclosion();
 	if (!present || !portal) return null;
 	return createPortal(
 		<div
@@ -274,7 +274,7 @@ export type TitleProps = ComponentPropsWithoutRef<"h2">;
 
 const Title = forwardRef<HTMLHeadingElement, TitleProps>(
 	function Title(props, ref) {
-		return <h2 id={useEclose().titleId} {...props} ref={ref} />;
+		return <h2 id={useEclosion().titleId} {...props} ref={ref} />;
 	},
 );
 
@@ -282,7 +282,7 @@ export type DescriptionProps = ComponentPropsWithoutRef<"p">;
 
 const Description = forwardRef<HTMLParagraphElement, DescriptionProps>(
 	function Description(props, ref) {
-		return <p id={useEclose().descriptionId} {...props} ref={ref} />;
+		return <p id={useEclosion().descriptionId} {...props} ref={ref} />;
 	},
 );
 
@@ -297,7 +297,7 @@ const Shared = forwardRef<HTMLDivElement, SharedProps>(function Shared(
 	{ id, asChild, ...props },
 	ref,
 ) {
-	const { shared, controller } = useEclose();
+	const { shared, controller } = useEclosion();
 	const inside = useContext(InContent);
 	const own = useRef<HTMLElement | null>(null);
 
@@ -326,7 +326,7 @@ const Shared = forwardRef<HTMLDivElement, SharedProps>(function Shared(
 	);
 });
 
-export const Eclose = {
+export const Eclosion = {
 	Root,
 	Trigger,
 	Content,

@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it } from "vitest";
-import { Eclose } from "./eclose";
+import { Eclosion } from "./eclosion";
 import { $, click, dialog, render, settle, trigger } from "./test-utils";
 
 function Card({
@@ -9,15 +9,15 @@ function Card({
 	placement?: "centered" | "anchored";
 }) {
 	return (
-		<Eclose.Root placement={placement}>
-			<Eclose.Trigger>
-				<Eclose.Shared id="cover" className="thumb" />
-			</Eclose.Trigger>
-			<Eclose.Content>
-				<Eclose.Shared id="cover" className="hero" />
-				<Eclose.Close id="close" />
-			</Eclose.Content>
-		</Eclose.Root>
+		<Eclosion.Root placement={placement}>
+			<Eclosion.Trigger>
+				<Eclosion.Shared id="cover" className="thumb" />
+			</Eclosion.Trigger>
+			<Eclosion.Content>
+				<Eclosion.Shared id="cover" className="hero" />
+				<Eclosion.Close id="close" />
+			</Eclosion.Content>
+		</Eclosion.Root>
 	);
 }
 

@@ -15,7 +15,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-	title: { default: "Eclose", template: "%s · Eclose" },
+	title: { default: "Eclosion", template: "%s · Eclosion" },
 	description: "A dialog or popover that grows out of its trigger.",
 };
 

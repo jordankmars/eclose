@@ -67,10 +67,10 @@ describe("covering", () => {
 		expect(covering(trigger)).toEqual([]);
 	});
 
-	it("ignores eclose's own layers", () => {
+	it("ignores eclosion's own layers", () => {
 		const { trigger } = setup();
 		const portal = document.createElement("div");
-		portal.setAttribute("data-eclose", "");
+		portal.setAttribute("data-eclosion", "");
 		portal.style.position = "fixed";
 		document.body.append(portal);
 		hits(portal, trigger);

@@ -1,4 +1,4 @@
-import type { Origin } from "eclose/react";
+import type { Origin } from "eclosion/react";
 import { highlight } from "@/lib/highlight";
 import { ORIGINS, originCode } from "./examples/origin-code";
 import { OriginPicker } from "./examples/origin-picker";

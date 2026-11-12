@@ -3,17 +3,17 @@ import { act, type ReactNode } from "react";
 import { hydrateRoot } from "react-dom/client";
 import { renderToString } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
-import { Eclose } from "./eclose";
+import { Eclosion } from "./eclosion";
 import { click, dialog, settle, trigger } from "./test-utils";
 
 const App = (props: { defaultOpen?: boolean }) => (
-	<Eclose.Root {...props} placement="centered">
-		<Eclose.Trigger>Open</Eclose.Trigger>
-		<Eclose.Overlay />
-		<Eclose.Content>
-			<Eclose.Title>Heading</Eclose.Title>
-		</Eclose.Content>
-	</Eclose.Root>
+	<Eclosion.Root {...props} placement="centered">
+		<Eclosion.Trigger>Open</Eclosion.Trigger>
+		<Eclosion.Overlay />
+		<Eclosion.Content>
+			<Eclosion.Title>Heading</Eclosion.Title>
+		</Eclosion.Content>
+	</Eclosion.Root>
 );
 
 /** Hydrates server markup, handing back every mismatch React reported. */

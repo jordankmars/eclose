@@ -761,7 +761,7 @@ function App() {
 	return (
 		<>
 			<header className="wrap top">
-				<h1>eclose playground</h1>
+				<h1>eclosion playground</h1>
 				<p>
 					The core engine, driven straight from React. Click again mid-flight
 					and the motion should bend toward the new target instead of

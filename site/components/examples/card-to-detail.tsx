@@ -1,6 +1,6 @@
 "use client";
 
-import { Eclose } from "eclose/react";
+import { Eclosion } from "eclosion/react";
 
 const albums = [
 	{
@@ -33,9 +33,9 @@ export function CardToDetail() {
 	return (
 		<div className="flex w-full justify-center gap-5">
 			{albums.map((album) => (
-				<Eclose.Root key={album.title} placement="centered">
-					<Eclose.Trigger className="group grid w-[min(170px,30%)] gap-2 rounded-xl text-left">
-						<Eclose.Shared
+				<Eclosion.Root key={album.title} placement="centered">
+					<Eclosion.Trigger className="group grid w-[min(170px,30%)] gap-2 rounded-xl text-left">
+						<Eclosion.Shared
 							id="cover"
 							className="aspect-square rounded-xl group-hover:brightness-105"
 							style={{ background: album.art }}
@@ -44,22 +44,22 @@ export function CardToDetail() {
 							<b className="block text-[13px] font-medium">{album.title}</b>
 							<span className={`text-xs ${muted}`}>{album.artist}</span>
 						</div>
-					</Eclose.Trigger>
-					<Eclose.Overlay className="bg-[rgba(12,12,16,0.42)] dark:bg-black/60" />
-					<Eclose.Content className="group grid w-[min(440px,calc(100vw-32px))] gap-2.5 rounded-[22px] bg-white p-3 dark:bg-neutral-900">
-						<Eclose.Shared
+					</Eclosion.Trigger>
+					<Eclosion.Overlay className="bg-[rgba(12,12,16,0.42)] dark:bg-black/60" />
+					<Eclosion.Content className="group grid w-[min(440px,calc(100vw-32px))] gap-2.5 rounded-[22px] bg-white p-3 dark:bg-neutral-900">
+						<Eclosion.Shared
 							id="cover"
 							className="h-[230px] rounded-[14px]"
 							style={{ background: album.art }}
 						/>
 						<div className="grid gap-1.5 px-1.5 pb-1.5 transition-[opacity,translate] delay-140 duration-200 group-data-[state=closing]:opacity-0 group-data-[state=closing]:delay-0 group-data-[state=closing]:duration-100 starting:opacity-0 motion-safe:starting:translate-y-2">
 							<p className={`font-mono text-[13px] ${muted}`}>{album.meta}</p>
-							<Eclose.Title className="text-xl font-semibold tracking-tight">
+							<Eclosion.Title className="text-xl font-semibold tracking-tight">
 								{album.title}
-							</Eclose.Title>
-							<Eclose.Description className={`text-sm ${muted}`}>
+							</Eclosion.Title>
+							<Eclosion.Description className={`text-sm ${muted}`}>
 								{album.text}
-							</Eclose.Description>
+							</Eclosion.Description>
 							<div className="mt-2 flex gap-1.5">
 								<button
 									type="button"
@@ -67,15 +67,15 @@ export function CardToDetail() {
 								>
 									Play
 								</button>
-								<Eclose.Close
+								<Eclosion.Close
 									className={`${button} bg-neutral-100 hover:bg-neutral-200 dark:bg-neutral-800 dark:hover:bg-neutral-700`}
 								>
 									Close
-								</Eclose.Close>
+								</Eclosion.Close>
 							</div>
 						</div>
-					</Eclose.Content>
-				</Eclose.Root>
+					</Eclosion.Content>
+				</Eclosion.Root>
 			))}
 		</div>
 	);

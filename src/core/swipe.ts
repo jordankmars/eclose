@@ -72,7 +72,7 @@ export function swipe(el: HTMLElement, options: SwipeOptions): () => void {
 		state = "idle";
 		const target = e.target as Element;
 		if (e.touches.length !== 1 || !options.enabled()) return;
-		if (target.closest("input[type=range],[data-eclose-no-swipe]")) return;
+		if (target.closest("input[type=range],[data-eclosion-no-swipe]")) return;
 		startX = e.touches[0].clientX;
 		startY = e.touches[0].clientY;
 		scroller = scrollParent(target, el);

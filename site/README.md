@@ -1,6 +1,6 @@
-# eclose site
+# eclosion site
 
-The docs site for eclose: Next.js, statically exported, hosted on Cloudflare.
+The docs site for eclosion: Next.js, statically exported, hosted on Cloudflare.
 
 ```sh
 pnpm site:dev    # from the repo root, builds the library first

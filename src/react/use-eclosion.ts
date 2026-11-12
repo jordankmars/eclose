@@ -86,13 +86,13 @@ interface Refs {
 	bars: Element[];
 }
 
-/** One `Eclose.Shared` id: its element on the trigger's side and in the content. */
+/** One `Eclosion.Shared` id: its element on the trigger's side and in the content. */
 export interface SharedPair {
 	source: HTMLElement | null;
 	dest: HTMLElement | null;
 }
 
-export interface EcloseContext {
+export interface EclosionContext {
 	open: boolean;
 	present: boolean;
 	phase: Phase;
@@ -112,18 +112,18 @@ export interface EcloseContext {
 	settleNext: RefObject<boolean>;
 }
 
-const Context = createContext<EcloseContext | null>(null);
-/** The portal of the nearest open eclose, which a nested one renders inside. */
+const Context = createContext<EclosionContext | null>(null);
+/** The portal of the nearest open eclosion, which a nested one renders inside. */
 const ParentPortal = createContext<HTMLElement | null>(null);
 
-export const EcloseProvider = Context.Provider;
+export const EclosionProvider = Context.Provider;
 export const ParentPortalProvider = ParentPortal.Provider;
 /** Whether a part sits inside the content, which makes a Shared the destination. */
 export const InContent = createContext(false);
 
-export function useEclose(): EcloseContext {
+export function useEclosion(): EclosionContext {
 	const context = useContext(Context);
-	if (!context) throw new Error("eclose: parts must be inside Eclose.Root");
+	if (!context) throw new Error("eclosion: parts must be inside Eclosion.Root");
 	return context;
 }
 
@@ -184,13 +184,13 @@ function focusTarget({ surface, initialFocus }: Refs): HTMLElement | null {
 
 function createPortalRoot(): HTMLElement {
 	const el = document.createElement("div");
-	el.setAttribute("data-eclose", "");
+	el.setAttribute("data-eclosion", "");
 	el.style.cssText =
-		"position:absolute;top:0;left:0;z-index:var(--eclose-z,9999)";
+		"position:absolute;top:0;left:0;z-index:var(--eclosion-z,9999)";
 	return el;
 }
 
-export function useRoot(options: RootOptions): EcloseContext {
+export function useRoot(options: RootOptions): EclosionContext {
 	const [own, setOwn] = useState(!!options.defaultOpen);
 	const open = options.open ?? own;
 	const [phase, setPhase] = useState<Phase>("closed");
@@ -293,7 +293,7 @@ export function useRoot(options: RootOptions): EcloseContext {
 }
 
 /** Lives as long as the content is mounted, and runs its motion. */
-export function usePresence(context: EcloseContext): void {
+export function usePresence(context: EclosionContext): void {
 	const {
 		open,
 		controller,

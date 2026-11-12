@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { act } from "react";
 import { describe, expect, it, vi } from "vitest";
-import { Eclose } from "./eclose";
+import { Eclosion } from "./eclosion";
 import { $, click, dialog, render, settle, trigger } from "./test-utils";
 
 function finger(type: string, target: Element, y: number, t = 0) {
@@ -28,15 +28,15 @@ function Sheet(props: {
 	onOpenChange?: (o: boolean) => void;
 }) {
 	return (
-		<Eclose.Root placement="centered" {...props}>
-			<Eclose.Trigger>Open</Eclose.Trigger>
-			<Eclose.Content>
-				<Eclose.Root>
-					<Eclose.Trigger id="menu">Menu</Eclose.Trigger>
-					<Eclose.Content id="menu-content" />
-				</Eclose.Root>
-			</Eclose.Content>
-		</Eclose.Root>
+		<Eclosion.Root placement="centered" {...props}>
+			<Eclosion.Trigger>Open</Eclosion.Trigger>
+			<Eclosion.Content>
+				<Eclosion.Root>
+					<Eclosion.Trigger id="menu">Menu</Eclosion.Trigger>
+					<Eclosion.Content id="menu-content" />
+				</Eclosion.Root>
+			</Eclosion.Content>
+		</Eclosion.Root>
 	);
 }
 

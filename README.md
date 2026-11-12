@@ -1,4 +1,4 @@
-# eclose
+# eclosion
 
 [![CI](https://github.com/jordankmars/eclose/actions/workflows/ci.yml/badge.svg)](https://github.com/jordankmars/eclose/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
@@ -16,35 +16,35 @@ It's about 9 kB gzipped, with no dependencies beyond React.
 ## Installation
 
 ```sh
-npm install eclose
+npm install eclosion
 ```
 
 ## Usage
 
 ```tsx
-import { Eclose } from "eclose/react";
+import { Eclosion } from "eclosion/react";
 
-<Eclose.Root>
-	<Eclose.Trigger>Share</Eclose.Trigger>
-	<Eclose.Content>
-		<Eclose.Title>Share this</Eclose.Title>
-		<Eclose.Close />
-	</Eclose.Content>
-</Eclose.Root>;
+<Eclosion.Root>
+	<Eclosion.Trigger>Share</Eclosion.Trigger>
+	<Eclosion.Content>
+		<Eclosion.Title>Share this</Eclosion.Title>
+		<Eclosion.Close />
+	</Eclosion.Content>
+</Eclosion.Root>;
 ```
 
-eclose ships no CSS. Style the parts with your own classes, and the motion takes care of itself.
+eclosion ships no CSS. Style the parts with your own classes, and the motion takes care of itself.
 
 ### Parts
 
-| Part                                 | Props                                                                                                  |
-| ------------------------------------ | ------------------------------------------------------------------------------------------------------ |
-| `Eclose.Root`                        | `open`, `defaultOpen`, `onOpenChange`, `placement`, `origin`, `modal`, `swipe`, `container`            |
-| `Eclose.Trigger`, `Eclose.Close`     | `asChild`, plus button props                                                                           |
-| `Eclose.Content`                     | `initialFocus` ref, plus div props. Without it, focus goes to an `autoFocus` child, or else the dialog |
-| `Eclose.Shared`                      | `id` (required), `asChild`                                                                             |
-| `Eclose.Overlay`                     | div props. You color it, and it fades on its own                                                       |
-| `Eclose.Title`, `Eclose.Description` | Label the dialog for assistive technology                                                              |
+| Part                                     | Props                                                                                                  |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| `Eclosion.Root`                          | `open`, `defaultOpen`, `onOpenChange`, `placement`, `origin`, `modal`, `swipe`, `container`            |
+| `Eclosion.Trigger`, `Eclosion.Close`     | `asChild`, plus button props                                                                           |
+| `Eclosion.Content`                       | `initialFocus` ref, plus div props. Without it, focus goes to an `autoFocus` child, or else the dialog |
+| `Eclosion.Shared`                        | `id` (required), `asChild`                                                                             |
+| `Eclosion.Overlay`                       | div props. You color it, and it fades on its own                                                       |
+| `Eclosion.Title`, `Eclosion.Description` | Label the dialog for assistive technology                                                              |
 
 Every part also has `data-state`: `closed`, `opening`, `open` or `closing`.
 
@@ -62,30 +62,30 @@ Near a viewport edge, it lines up the trigger's other edge if that fits, and oth
 
 ### Shared elements
 
-Put an `Eclose.Shared` with the same `id` on each side, and that element flies across on its own while the surface grows around it.
+Put an `Eclosion.Shared` with the same `id` on each side, and that element flies across on its own while the surface grows around it.
 
 ```tsx
-<Eclose.Root placement="centered">
-	<Eclose.Trigger>
-		<Eclose.Shared id="cover" className="thumbnail" />
-	</Eclose.Trigger>
-	<Eclose.Overlay className="scrim" />
-	<Eclose.Content>
-		<Eclose.Shared id="cover" className="hero" />
-	</Eclose.Content>
-</Eclose.Root>;
+<Eclosion.Root placement="centered">
+	<Eclosion.Trigger>
+		<Eclosion.Shared id="cover" className="thumbnail" />
+	</Eclosion.Trigger>
+	<Eclosion.Overlay className="scrim" />
+	<Eclosion.Content>
+		<Eclosion.Shared id="cover" className="hero" />
+	</Eclosion.Content>
+</Eclosion.Root>;
 ```
 
 A copy does the flying and the real element appears when it lands, so keep Shared for media-like elements. A copy won't carry over a playing video or a canvas, or CSS scoped under the content's parents.
 
 ### Swipe
 
-On touch, dragging down dismisses. Inside a scroller, it only takes over from the top. Pass `swipe={false}` to turn it off, or mark an element with `data-eclose-no-swipe` to exempt it.
+On touch, dragging down dismisses. Inside a scroller, it only takes over from the top. Pass `swipe={false}` to turn it off, or mark an element with `data-eclosion-no-swipe` to exempt it.
 
 ### Good to know
 
-- Don't put a CSS `transition` on `Eclose.Content`. It fights the per-frame updates.
-- Portals sit at `z-index: 9999`. Set `--eclose-z` to change that.
+- Don't put a CSS `transition` on `Eclosion.Content`. It fights the per-frame updates.
+- Portals sit at `z-index: 9999`. Set `--eclosion-z` to change that.
 - A trigger's position is followed through scrolling and resizing, but not through a CSS transform animating on its parent mid-morph. The browser doesn't report those.
 - Don't pass a `container` that's scaled. Translated is fine.
 - With reduced motion, everything becomes a fade.
@@ -100,11 +100,11 @@ Reopening halfway through a close retargets the springs from where they are and 
 
 ## Adapters
 
-| Framework | Import path     | Status      |
-| --------- | --------------- | ----------- |
-| React     | `eclose/react`  | Available   |
-| Vue       | `eclose/vue`    | Coming soon |
-| Svelte    | `eclose/svelte` | Coming soon |
+| Framework | Import path       | Status      |
+| --------- | ----------------- | ----------- |
+| React     | `eclosion/react`  | Available   |
+| Vue       | `eclosion/vue`    | Coming soon |
+| Svelte    | `eclosion/svelte` | Coming soon |
 
 ## Development
 
@@ -120,12 +120,12 @@ pnpm size       # checks the built size against the budget
 pnpm site:dev   # docs site
 ```
 
-| Path         | What's there                                    |
-| ------------ | ----------------------------------------------- |
-| `src/core`   | The engine: springs, morphs, focus, scroll lock |
-| `src/react`  | The React adapter, published as `eclose/react`  |
-| `playground` | A Vite page for working on the engine           |
-| `site`       | The docs site, built with Next.js               |
+| Path         | What's there                                     |
+| ------------ | ------------------------------------------------ |
+| `src/core`   | The engine: springs, morphs, focus, scroll lock  |
+| `src/react`  | The React adapter, published as `eclosion/react` |
+| `playground` | A Vite page for working on the engine            |
+| `site`       | The docs site, built with Next.js                |
 
 The playground has two halves: demos that drive the core engine directly from
 React, and the same demos built with the public components.

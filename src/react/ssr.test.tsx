@@ -1,16 +1,16 @@
 // @vitest-environment node
 import { renderToString } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
-import { Eclose } from "./eclose";
+import { Eclosion } from "./eclosion";
 
 const App = (props: { defaultOpen?: boolean }) => (
-	<Eclose.Root {...props} placement="centered">
-		<Eclose.Trigger>Open</Eclose.Trigger>
-		<Eclose.Overlay />
-		<Eclose.Content>
-			<Eclose.Title>Heading</Eclose.Title>
-		</Eclose.Content>
-	</Eclose.Root>
+	<Eclosion.Root {...props} placement="centered">
+		<Eclosion.Trigger>Open</Eclosion.Trigger>
+		<Eclosion.Overlay />
+		<Eclosion.Content>
+			<Eclosion.Title>Heading</Eclosion.Title>
+		</Eclosion.Content>
+	</Eclosion.Root>
 );
 
 describe("on the server", () => {

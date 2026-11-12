@@ -1,6 +1,6 @@
 import type { SpringOptions } from "./spring";
 
-// eclose ships one tuned spring. These knobs exist for the playground and for
+// eclosion ships one tuned spring. These knobs exist for the playground and for
 // tests, not as public API.
 
 export interface MotionConfig extends SpringOptions {

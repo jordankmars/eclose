@@ -6,7 +6,7 @@ export const metadata = { title: "Styling" };
 
 <Lead>The same parts, in any look.</Lead>
 
-eclose ships no CSS. Each part takes your own classes, and the motion draws real borders, radii and shadows all the way through. Here's one menu in five styles.
+eclosion ships no CSS. Each part takes your own classes, and the motion draws real borders, radii and shadows all the way through. Here's one menu in five styles.
 
 ## Site
 
@@ -28,7 +28,7 @@ Thick borders and a hard offset shadow. The shadow grows with the surface.
 
 ## Terminal
 
-Monospace and sharp corners. Give `Eclose.Close` children to replace its `×`.
+Monospace and sharp corners. Give `Eclosion.Close` children to replace its `×`.
 
 <Example name="style-terminal" />
 
@@ -43,10 +43,10 @@ Large radii and a wide, diffuse shadow. The radius morphs along with the size.
 Every part has a `data-state` of `closed`, `opening`, `open` or `closing`.
 
 ```tsx
-<Eclose.Trigger className="data-[state=open]:pointer-events-none" />
+<Eclosion.Trigger className="data-[state=open]:pointer-events-none" />
 ```
 
 ## Good to know
 
-- Don't put a CSS `transition` on `Eclose.Content`. It fights the per-frame updates.
-- Portals sit at `z-index: 9999`. Set `--eclose-z` to change that.
+- Don't put a CSS `transition` on `Eclosion.Content`. It fights the per-frame updates.
+- Portals sit at `z-index: 9999`. Set `--eclosion-z` to change that.

@@ -13,8 +13,8 @@ const files = readdirSync(DIST, { recursive: true, encoding: "utf8" })
 	.map((file) => readFileSync(join(DIST, file)));
 const size = gzipSync(Buffer.concat(files), { level: 9 }).length;
 
-console.log(`eclose: ${size} B gzip (budget ${BUDGET} B)`);
+console.log(`eclosion: ${size} B gzip (budget ${BUDGET} B)`);
 if (size > BUDGET) {
-	console.error(`eclose: ${size - BUDGET} B over budget`);
+	console.error(`eclosion: ${size - BUDGET} B over budget`);
 	process.exit(1);
 }
