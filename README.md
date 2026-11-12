@@ -5,6 +5,10 @@
 
 > A dialog or popover that grows out of its trigger.
 
+<p align="center">
+	<img src="./.github/assets/demo.gif" width="420" alt="A Now playing pill grows into a music player card, then shrinks back into the pill" />
+</p>
+
 A card becomes a detail view, a button becomes a menu, a pill becomes a panel. It's live DOM, every morph can be interrupted, and it dismisses with a swipe.
 
 It's about 9 kB gzipped, with no dependencies beyond React.
