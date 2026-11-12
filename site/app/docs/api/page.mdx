@@ -2,25 +2,25 @@ export const metadata = { title: "API" };
 
 # API
 
-<Lead>The parts of eclose and the props they take.</Lead>
+<Lead>The parts of eclosion and the props they take.</Lead>
 
 ## Anatomy
 
-Import `Eclose` and put the parts together.
+Import `Eclosion` and put the parts together.
 
 ```tsx
-import { Eclose } from "eclose/react";
+import { Eclosion } from "eclosion/react";
 
-<Eclose.Root>
-	<Eclose.Trigger />
-	<Eclose.Overlay />
-	<Eclose.Content>
-		<Eclose.Title />
-		<Eclose.Description />
-		<Eclose.Shared id="cover" />
-		<Eclose.Close />
-	</Eclose.Content>
-</Eclose.Root>;
+<Eclosion.Root>
+	<Eclosion.Trigger />
+	<Eclosion.Overlay />
+	<Eclosion.Content>
+		<Eclosion.Title />
+		<Eclosion.Description />
+		<Eclosion.Shared id="cover" />
+		<Eclosion.Close />
+	</Eclosion.Content>
+</Eclosion.Root>;
 ```
 
 ## Components
@@ -91,11 +91,11 @@ An element that flies between the trigger and the content. Put one with the same
 
 ## Swipe
 
-On touch, dragging down dismisses. Inside a scroller, it only takes over from the top. Pass `swipe={false}` to turn it off, or mark an element with `data-eclose-no-swipe` to exempt it.
+On touch, dragging down dismisses. Inside a scroller, it only takes over from the top. Pass `swipe={false}` to turn it off, or mark an element with `data-eclosion-no-swipe` to exempt it.
 
 ## Good to know
 
-- Portals sit at `z-index: 9999`. Set `--eclose-z` to change that.
+- Portals sit at `z-index: 9999`. Set `--eclosion-z` to change that.
 - A trigger's position is followed through scrolling and resizing, but not through a CSS transform animating on its parent mid-morph.
 - Don't pass a `container` that's scaled. Translated is fine.
 - With reduced motion, everything becomes a fade.

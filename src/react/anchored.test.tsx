@@ -3,7 +3,7 @@ import { act } from "react";
 import { describe, expect, it, vi } from "vitest";
 import type { Origin } from "../core";
 import { Morph } from "../core";
-import { Eclose } from "./eclose";
+import { Eclosion } from "./eclosion";
 import { click, dialog, render, resized, settle, trigger } from "./test-utils";
 
 const triggerRect = { left: 100, top: 100, width: 80, height: 30 };
@@ -26,12 +26,12 @@ function Popover(props: {
 }) {
 	return (
 		<div id="scroller">
-			<Eclose.Root origin="top-left" {...props}>
-				<Eclose.Trigger>Open</Eclose.Trigger>
-				<Eclose.Content>
+			<Eclosion.Root origin="top-left" {...props}>
+				<Eclosion.Trigger>Open</Eclosion.Trigger>
+				<Eclosion.Content>
 					<p>Body</p>
-				</Eclose.Content>
-			</Eclose.Root>
+				</Eclosion.Content>
+			</Eclosion.Root>
 		</div>
 	);
 }
@@ -128,10 +128,10 @@ describe("origin", () => {
 		triggerRect.left = 400;
 		triggerRect.top = 400;
 		render(
-			<Eclose.Root>
-				<Eclose.Trigger>Open</Eclose.Trigger>
-				<Eclose.Content>Body</Eclose.Content>
-			</Eclose.Root>,
+			<Eclosion.Root>
+				<Eclosion.Trigger>Open</Eclosion.Trigger>
+				<Eclosion.Content>Body</Eclosion.Content>
+			</Eclosion.Root>,
 		);
 		click(trigger());
 		triggerRect.left = 100;

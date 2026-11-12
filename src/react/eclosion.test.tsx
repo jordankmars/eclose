@@ -2,18 +2,18 @@
 import { StrictMode, useState } from "react";
 import { describe, expect, it, vi } from "vitest";
 import { Morph } from "../core";
-import { Eclose } from "./eclose";
+import { Eclosion } from "./eclosion";
 import { click, dialog, render, settle, trigger } from "./test-utils";
 
 function Basic(props: { defaultOpen?: boolean }) {
 	return (
-		<Eclose.Root {...props}>
-			<Eclose.Trigger>Share</Eclose.Trigger>
-			<Eclose.Content>
+		<Eclosion.Root {...props}>
+			<Eclosion.Trigger>Share</Eclosion.Trigger>
+			<Eclosion.Content>
 				<p>Body</p>
-				<Eclose.Close />
-			</Eclose.Content>
-		</Eclose.Root>
+				<Eclosion.Close />
+			</Eclosion.Content>
+		</Eclosion.Root>
 	);
 }
 
@@ -38,7 +38,7 @@ describe("open and close", () => {
 		render(<Basic />);
 		click(trigger());
 		expect(dialog().closest("#app")).toBeNull();
-		expect(dialog().closest("[data-eclose]")).not.toBeNull();
+		expect(dialog().closest("[data-eclosion]")).not.toBeNull();
 		expect(dialog().getAttribute("data-state")).toBe("opening");
 		await settle();
 		expect(dialog().getAttribute("data-state")).toBe("open");
@@ -53,7 +53,7 @@ describe("open and close", () => {
 		expect(dialog().getAttribute("data-state")).toBe("closing");
 		await settle();
 		expect(dialog()).toBeNull();
-		expect(document.querySelector("[data-eclose]")).toBeNull();
+		expect(document.querySelector("[data-eclosion]")).toBeNull();
 	});
 
 	it("hides the trigger behind the surface and brings it back", async () => {
@@ -110,10 +110,10 @@ describe("control", () => {
 
 	it("follows a controlled prop in both directions", async () => {
 		const ui = (open: boolean) => (
-			<Eclose.Root open={open}>
-				<Eclose.Trigger>Share</Eclose.Trigger>
-				<Eclose.Content>Body</Eclose.Content>
-			</Eclose.Root>
+			<Eclosion.Root open={open}>
+				<Eclosion.Trigger>Share</Eclosion.Trigger>
+				<Eclosion.Content>Body</Eclosion.Content>
+			</Eclosion.Root>
 		);
 		const { rerender } = render(ui(false));
 		rerender(ui(true));
@@ -128,12 +128,12 @@ describe("control", () => {
 	it("lets a controlled parent veto a close", async () => {
 		const onOpenChange = vi.fn();
 		render(
-			<Eclose.Root open onOpenChange={onOpenChange}>
-				<Eclose.Trigger>Share</Eclose.Trigger>
-				<Eclose.Content>
-					<Eclose.Close />
-				</Eclose.Content>
-			</Eclose.Root>,
+			<Eclosion.Root open onOpenChange={onOpenChange}>
+				<Eclosion.Trigger>Share</Eclosion.Trigger>
+				<Eclosion.Content>
+					<Eclosion.Close />
+				</Eclosion.Content>
+			</Eclosion.Root>,
 		);
 		await settle();
 		click(dialog().querySelector("button") as Element);
@@ -144,10 +144,12 @@ describe("control", () => {
 
 	it("respects a handler that prevents the default", () => {
 		render(
-			<Eclose.Root>
-				<Eclose.Trigger onClick={(e) => e.preventDefault()}>x</Eclose.Trigger>
-				<Eclose.Content />
-			</Eclose.Root>,
+			<Eclosion.Root>
+				<Eclosion.Trigger onClick={(e) => e.preventDefault()}>
+					x
+				</Eclosion.Trigger>
+				<Eclosion.Content />
+			</Eclosion.Root>,
 		);
 		click(trigger());
 		expect(dialog()).toBeNull();
@@ -158,14 +160,14 @@ describe("asChild", () => {
 	it("puts the behaviour on the child and keeps its handlers", () => {
 		const childClick = vi.fn();
 		render(
-			<Eclose.Root>
-				<Eclose.Trigger asChild className="a">
+			<Eclosion.Root>
+				<Eclosion.Trigger asChild className="a">
 					<button type="button" className="b" onClick={childClick}>
 						Open
 					</button>
-				</Eclose.Trigger>
-				<Eclose.Content />
-			</Eclose.Root>,
+				</Eclosion.Trigger>
+				<Eclosion.Content />
+			</Eclosion.Root>,
 		);
 		const el = trigger();
 		expect(document.querySelectorAll("button")).toHaveLength(1);
@@ -187,7 +189,7 @@ describe("React environment", () => {
 		expect(dialog().getAttribute("data-state")).toBe("opening");
 		await settle();
 		expect(dialog().getAttribute("data-state")).toBe("open");
-		expect(document.querySelectorAll("[data-eclose]")).toHaveLength(1);
+		expect(document.querySelectorAll("[data-eclosion]")).toHaveLength(1);
 		click(dialog().querySelector("button") as Element);
 		await settle();
 		expect(dialog()).toBeNull();
@@ -206,6 +208,6 @@ describe("React environment", () => {
 		render(<Unmounting />);
 		await settle();
 		click(document.getElementById("drop") as Element);
-		expect(document.querySelector("[data-eclose]")).toBeNull();
+		expect(document.querySelector("[data-eclosion]")).toBeNull();
 	});
 });

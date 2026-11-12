@@ -15,7 +15,7 @@ Pick an `origin` below and open it.
 That point of the content sits on the same point of the trigger, and stays still while the rest grows away from it. With `bottom-right`, the two bottom-right corners line up and the content grows up and to the left.
 
 ```tsx
-<Eclose.Root origin="bottom-right">{/* ... */}</Eclose.Root>
+<Eclosion.Root origin="bottom-right">{/* ... */}</Eclosion.Root>
 ```
 
 It's `center` by default.
@@ -31,5 +31,5 @@ Content stays on screen. If it would overflow, it lines up the trigger's other e
 `placement="centered"` puts the content in the middle of the viewport, and is modal unless you set `modal={false}`. It ignores `origin` and always grows from its center.
 
 ```tsx
-<Eclose.Root placement="centered">{/* ... */}</Eclose.Root>
+<Eclosion.Root placement="centered">{/* ... */}</Eclosion.Root>
 ```

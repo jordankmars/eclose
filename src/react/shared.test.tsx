@@ -1,26 +1,26 @@
 // @vitest-environment jsdom
 import { describe, expect, it } from "vitest";
 import { configure } from "../core";
-import { Eclose } from "./eclose";
+import { Eclosion } from "./eclosion";
 import { $, click, dialog, render, settle, trigger } from "./test-utils";
 
 function Card() {
 	return (
-		<Eclose.Root placement="centered">
-			<Eclose.Trigger>
-				<Eclose.Shared id="cover" className="thumb" />
-			</Eclose.Trigger>
-			<Eclose.Content>
-				<Eclose.Shared id="cover" className="hero" />
-				<Eclose.Close id="close" />
-			</Eclose.Content>
-		</Eclose.Root>
+		<Eclosion.Root placement="centered">
+			<Eclosion.Trigger>
+				<Eclosion.Shared id="cover" className="thumb" />
+			</Eclosion.Trigger>
+			<Eclosion.Content>
+				<Eclosion.Shared id="cover" className="hero" />
+				<Eclosion.Close id="close" />
+			</Eclosion.Content>
+		</Eclosion.Root>
 	);
 }
 
 const copy = () => $("[inert][aria-hidden]").firstElementChild as HTMLElement;
 
-describe("Eclose.Shared", () => {
+describe("Eclosion.Shared", () => {
 	it("flies a copy and hides both originals", () => {
 		render(<Card />);
 		click(trigger());
@@ -69,12 +69,12 @@ describe("Eclose.Shared", () => {
 
 	it("morphs the surface normally when the pair is incomplete", () => {
 		render(
-			<Eclose.Root>
-				<Eclose.Trigger>
-					<Eclose.Shared id="other" className="thumb" />
-				</Eclose.Trigger>
-				<Eclose.Content />
-			</Eclose.Root>,
+			<Eclosion.Root>
+				<Eclosion.Trigger>
+					<Eclosion.Shared id="other" className="thumb" />
+				</Eclosion.Trigger>
+				<Eclosion.Content />
+			</Eclosion.Root>,
 		);
 		click(trigger());
 		expect(copy()).toBeNull();

@@ -1,4 +1,4 @@
-import type { Origin } from "eclose/react";
+import type { Origin } from "eclosion/react";
 
 export const ORIGINS: Origin[] = [
 	"top-left",
@@ -14,16 +14,16 @@ export const ORIGINS: Origin[] = [
 
 export const originCode = (
 	origin: Origin,
-) => `import { Eclose } from "eclose/react";
+) => `import { Eclosion } from "eclosion/react";
 
 export function Example() {
 	return (
-		<Eclose.Root origin="${origin}">
-			<Eclose.Trigger>Open</Eclose.Trigger>
-			<Eclose.Content>
-				<Eclose.Title>${origin}</Eclose.Title>
-				<Eclose.Close />
-			</Eclose.Content>
-		</Eclose.Root>
+		<Eclosion.Root origin="${origin}">
+			<Eclosion.Trigger>Open</Eclosion.Trigger>
+			<Eclosion.Content>
+				<Eclosion.Title>${origin}</Eclosion.Title>
+				<Eclosion.Close />
+			</Eclosion.Content>
+		</Eclosion.Root>
 	);
 }`;

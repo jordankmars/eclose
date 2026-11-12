@@ -1,7 +1,7 @@
 // The same demos as App.tsx, built with the real components instead of driving
 // the core by hand. Anything that works there and not here is an adapter bug.
 
-import { Eclose } from "../src/react";
+import { Eclosion } from "../src/react";
 
 const ALBUMS = [
 	{
@@ -59,14 +59,14 @@ function CardToDetail() {
 		<Demo
 			wide
 			title="Card to detail"
-			text="Eclose.Shared flies the cover. The surface and overlay only fade."
+			text="Eclosion.Shared flies the cover. The surface and overlay only fade."
 			how="centered · shared · modal"
 		>
 			<div className="albums">
 				{ALBUMS.map((a) => (
-					<Eclose.Root key={a.title} placement="centered">
-						<Eclose.Trigger className="album">
-							<Eclose.Shared
+					<Eclosion.Root key={a.title} placement="centered">
+						<Eclosion.Trigger className="album">
+							<Eclosion.Shared
 								id="cover"
 								className="art"
 								style={{ background: a.art }}
@@ -75,25 +75,27 @@ function CardToDetail() {
 								<b>{a.title}</b>
 								<span>{a.artist}</span>
 							</div>
-						</Eclose.Trigger>
-						<Eclose.Overlay className="ec-scrim" />
-						<Eclose.Content className="ec-detail">
-							<Eclose.Shared
+						</Eclosion.Trigger>
+						<Eclosion.Overlay className="ec-scrim" />
+						<Eclosion.Content className="ec-detail">
+							<Eclosion.Shared
 								id="cover"
 								className="hero"
 								style={{ background: a.art }}
 							/>
 							<p className="meta">{a.meta}</p>
-							<Eclose.Title>{a.title}</Eclose.Title>
-							<Eclose.Description className="text">{a.text}</Eclose.Description>
+							<Eclosion.Title>{a.title}</Eclosion.Title>
+							<Eclosion.Description className="text">
+								{a.text}
+							</Eclosion.Description>
 							<div className="acts">
 								<button type="button" className="btn primary">
 									Play
 								</button>
-								<Eclose.Close className="btn">Close</Eclose.Close>
+								<Eclosion.Close className="btn">Close</Eclosion.Close>
 							</div>
-						</Eclose.Content>
-					</Eclose.Root>
+						</Eclosion.Content>
+					</Eclosion.Root>
 				))}
 			</div>
 		</Demo>
@@ -107,22 +109,22 @@ function Popover() {
 			text="The surface grows out of the button. It has a border and shadow on purpose."
 			how="anchored · surface morph"
 		>
-			<Eclose.Root>
-				<Eclose.Trigger className="pop pop-label">Share</Eclose.Trigger>
-				<Eclose.Content className="ec-pop">
+			<Eclosion.Root>
+				<Eclosion.Trigger className="pop pop-label">Share</Eclosion.Trigger>
+				<Eclosion.Content className="ec-pop">
 					<div className="pop-head">
-						<Eclose.Title className="ec-pop-title">
+						<Eclosion.Title className="ec-pop-title">
 							Share “Q3 roadmap”
-						</Eclose.Title>
-						<Eclose.Close />
+						</Eclosion.Title>
+						<Eclosion.Close />
 					</div>
 					{["Copy link", "Send by email", "Post to #design"].map((item) => (
-						<Eclose.Close key={item} className="pop-item">
+						<Eclosion.Close key={item} className="pop-item">
 							{item}
-						</Eclose.Close>
+						</Eclosion.Close>
 					))}
-				</Eclose.Content>
-			</Eclose.Root>
+				</Eclosion.Content>
+			</Eclosion.Root>
 		</Demo>
 	);
 }
@@ -134,9 +136,9 @@ function Pill() {
 			text="A status pill that becomes a live activity."
 			how="anchored · grows from the pill"
 		>
-			<Eclose.Root>
-				<Eclose.Trigger className="ec-pill">Now playing</Eclose.Trigger>
-				<Eclose.Content className="ec-music">
+			<Eclosion.Root>
+				<Eclosion.Trigger className="ec-pill">Now playing</Eclosion.Trigger>
+				<Eclosion.Content className="ec-music">
 					<div className="is-art" />
 					<div className="is-meta">
 						<b>Low Tide</b>
@@ -147,8 +149,8 @@ function Pill() {
 						<div />
 						<span>3:08</span>
 					</div>
-				</Eclose.Content>
-			</Eclose.Root>
+				</Eclosion.Content>
+			</Eclosion.Root>
 		</Demo>
 	);
 }
@@ -160,11 +162,11 @@ function Search() {
 			text="An icon button that widens into a focused field."
 			how="anchored · autoFocus"
 		>
-			<Eclose.Root>
-				<Eclose.Trigger className="search s-icon" aria-label="Search">
+			<Eclosion.Root>
+				<Eclosion.Trigger className="search s-icon" aria-label="Search">
 					⌕
-				</Eclose.Trigger>
-				<Eclose.Content className="ec-search">
+				</Eclosion.Trigger>
+				<Eclosion.Content className="ec-search">
 					<input
 						className="ec-search-field"
 						// biome-ignore lint/a11y/noAutofocus: the field is the whole point
@@ -172,8 +174,8 @@ function Search() {
 						placeholder="Search files"
 						aria-label="Search files"
 					/>
-				</Eclose.Content>
-			</Eclose.Root>
+				</Eclosion.Content>
+			</Eclosion.Root>
 		</Demo>
 	);
 }
@@ -185,24 +187,24 @@ function Nested() {
 			text="A menu inside a detail view. Escape closes one layer at a time."
 			how="modal with a popover inside"
 		>
-			<Eclose.Root placement="centered">
-				<Eclose.Trigger className="btn">Open detail</Eclose.Trigger>
-				<Eclose.Overlay className="ec-scrim" />
-				<Eclose.Content className="ec-detail">
-					<Eclose.Title>Detail</Eclose.Title>
+			<Eclosion.Root placement="centered">
+				<Eclosion.Trigger className="btn">Open detail</Eclosion.Trigger>
+				<Eclosion.Overlay className="ec-scrim" />
+				<Eclosion.Content className="ec-detail">
+					<Eclosion.Title>Detail</Eclosion.Title>
 					<p className="text">Open the menu, then press Escape twice.</p>
 					<div className="acts">
-						<Eclose.Root>
-							<Eclose.Trigger className="btn">More</Eclose.Trigger>
-							<Eclose.Content className="ec-pop">
-								<Eclose.Close className="pop-item">Rename</Eclose.Close>
-								<Eclose.Close className="pop-item">Duplicate</Eclose.Close>
-							</Eclose.Content>
-						</Eclose.Root>
-						<Eclose.Close className="btn">Close</Eclose.Close>
+						<Eclosion.Root>
+							<Eclosion.Trigger className="btn">More</Eclosion.Trigger>
+							<Eclosion.Content className="ec-pop">
+								<Eclosion.Close className="pop-item">Rename</Eclosion.Close>
+								<Eclosion.Close className="pop-item">Duplicate</Eclosion.Close>
+							</Eclosion.Content>
+						</Eclosion.Root>
+						<Eclosion.Close className="btn">Close</Eclosion.Close>
 					</div>
-				</Eclose.Content>
-			</Eclose.Root>
+				</Eclosion.Content>
+			</Eclosion.Root>
 		</Demo>
 	);
 }
@@ -214,19 +216,19 @@ function ScrollingSwipe() {
 			text="On touch, pull down to dismiss. The list scrolls first, and only a pull from its top dismisses."
 			how="swipe yields to inner scrolling"
 		>
-			<Eclose.Root placement="centered">
-				<Eclose.Trigger className="btn">Open sheet</Eclose.Trigger>
-				<Eclose.Overlay className="ec-scrim" />
-				<Eclose.Content className="ec-detail ec-sheet">
-					<Eclose.Title>Tracks</Eclose.Title>
+			<Eclosion.Root placement="centered">
+				<Eclosion.Trigger className="btn">Open sheet</Eclosion.Trigger>
+				<Eclosion.Overlay className="ec-scrim" />
+				<Eclosion.Content className="ec-detail ec-sheet">
+					<Eclosion.Title>Tracks</Eclosion.Title>
 					<div className="ec-list">
 						{Array.from({ length: 30 }, (_, i) => (
 							// biome-ignore lint/suspicious/noArrayIndexKey: a fixed list
 							<p key={i}>Track {i + 1}</p>
 						))}
 					</div>
-				</Eclose.Content>
-			</Eclose.Root>
+				</Eclosion.Content>
+			</Eclosion.Root>
 		</Demo>
 	);
 }
@@ -236,7 +238,7 @@ export function ComponentDemos() {
 		<>
 			<header className="wrap top">
 				<h1>Components</h1>
-				<p>The same behaviour, through the public eclose/react API.</p>
+				<p>The same behaviour, through the public eclosion/react API.</p>
 			</header>
 			<main className="wrap grid">
 				<CardToDetail />

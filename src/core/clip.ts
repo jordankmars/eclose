@@ -24,7 +24,7 @@ export function covering(trigger: Element): Element[] {
 		);
 		const above = stack.findIndex((el) => trigger.contains(el));
 		for (let el of stack.slice(0, Math.max(above, 0))) {
-			if (el.closest("[data-eclose]")) continue;
+			if (el.closest("[data-eclosion]")) continue;
 			while (!/fixed|sticky/.test(getComputedStyle(el).position)) {
 				if (!el.parentElement) break;
 				el = el.parentElement;

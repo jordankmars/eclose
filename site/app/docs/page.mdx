@@ -16,24 +16,24 @@ Install the package from your command line.
 
 <Install />
 
-## Create an Eclose
+## Create an Eclosion
 
 Compose the parts. The content stays out of the page until its trigger opens it.
 
 <CodeFile name="share.tsx">
 
 ```tsx
-import { Eclose } from "eclose/react";
+import { Eclosion } from "eclosion/react";
 
 export function Share() {
 	return (
-		<Eclose.Root>
-			<Eclose.Trigger>Share</Eclose.Trigger>
-			<Eclose.Content>
-				<Eclose.Title>Share this</Eclose.Title>
-				<Eclose.Close />
-			</Eclose.Content>
-		</Eclose.Root>
+		<Eclosion.Root>
+			<Eclosion.Trigger>Share</Eclosion.Trigger>
+			<Eclosion.Content>
+				<Eclosion.Title>Share this</Eclosion.Title>
+				<Eclosion.Close />
+			</Eclosion.Content>
+		</Eclosion.Root>
 	);
 }
 ```
@@ -42,12 +42,12 @@ export function Share() {
 
 ## Style it
 
-eclose ships no CSS. Style the parts with your own classes, and the motion takes care of itself.
+eclosion ships no CSS. Style the parts with your own classes, and the motion takes care of itself.
 
 ```tsx
-<Eclose.Content className="w-60 rounded-2xl bg-white p-2 shadow-lg">
+<Eclosion.Content className="w-60 rounded-2xl bg-white p-2 shadow-lg">
 	{/* ... */}
-</Eclose.Content>
+</Eclosion.Content>
 ```
 
-Every part has a `data-state` of `closed`, `opening`, `open` or `closing` to style against. Don't put a CSS `transition` on `Eclose.Content`, as it fights the per-frame updates.
+Every part has a `data-state` of `closed`, `opening`, `open` or `closing` to style against. Don't put a CSS `transition` on `Eclosion.Content`, as it fights the per-frame updates.

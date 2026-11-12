@@ -12,7 +12,7 @@ export function SiteHeader() {
 				<div className="flex items-center gap-2">
 					<MobileMenu />
 					<Link href="/" className="text-lg font-semibold tracking-tight">
-						Eclose
+						Eclosion
 					</Link>
 				</div>
 				<nav className="flex items-center gap-1">

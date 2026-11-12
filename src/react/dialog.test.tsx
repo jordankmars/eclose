@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { act, StrictMode, useRef } from "react";
 import { describe, expect, it, vi } from "vitest";
-import { Eclose } from "./eclose";
+import { Eclosion } from "./eclosion";
 import { $, click, dialog, render, settle, trigger } from "./test-utils";
 
 function Dialog(props: {
@@ -14,16 +14,16 @@ function Dialog(props: {
 			<main id="page">
 				<button id="outside" type="button" />
 			</main>
-			<Eclose.Root {...props}>
-				<Eclose.Trigger>Open</Eclose.Trigger>
-				<Eclose.Overlay className="scrim" />
-				<Eclose.Content>
-					<Eclose.Title>Heading</Eclose.Title>
-					<Eclose.Description>Words</Eclose.Description>
+			<Eclosion.Root {...props}>
+				<Eclosion.Trigger>Open</Eclosion.Trigger>
+				<Eclosion.Overlay className="scrim" />
+				<Eclosion.Content>
+					<Eclosion.Title>Heading</Eclosion.Title>
+					<Eclosion.Description>Words</Eclosion.Description>
 					<button id="first" type="button" />
 					<button id="last" type="button" />
-				</Eclose.Content>
-			</Eclose.Root>
+				</Eclosion.Content>
+			</Eclosion.Root>
 		</>
 	);
 }
@@ -31,14 +31,14 @@ function Dialog(props: {
 function WithInitialFocus(props: { attached: boolean; defaultOpen?: boolean }) {
 	const target = useRef<HTMLButtonElement>(null);
 	return (
-		<Eclose.Root defaultOpen={props.defaultOpen}>
-			<Eclose.Trigger>Open</Eclose.Trigger>
-			<Eclose.Content initialFocus={target}>
+		<Eclosion.Root defaultOpen={props.defaultOpen}>
+			<Eclosion.Trigger>Open</Eclosion.Trigger>
+			<Eclosion.Content initialFocus={target}>
 				{/* biome-ignore lint/a11y/noAutofocus: what's under test */}
 				<input id="auto" autoFocus />
 				{props.attached && <button id="target" type="button" ref={target} />}
-			</Eclose.Content>
-		</Eclose.Root>
+			</Eclosion.Content>
+		</Eclosion.Root>
 	);
 }
 
@@ -132,13 +132,13 @@ describe("focus", () => {
 
 	it("leaves a React autoFocus element focused", async () => {
 		render(
-			<Eclose.Root>
-				<Eclose.Trigger>Open</Eclose.Trigger>
-				<Eclose.Content>
+			<Eclosion.Root>
+				<Eclosion.Trigger>Open</Eclosion.Trigger>
+				<Eclosion.Content>
 					{/* biome-ignore lint/a11y/noAutofocus: what's under test */}
 					<input id="field" autoFocus />
-				</Eclose.Content>
-			</Eclose.Root>,
+				</Eclosion.Content>
+			</Eclosion.Root>,
 		);
 		click(trigger());
 		expect(document.activeElement).toBe($("#field"));
@@ -148,13 +148,13 @@ describe("focus", () => {
 	it("keeps a React autoFocus element focused in Strict Mode", async () => {
 		render(
 			<StrictMode>
-				<Eclose.Root>
-					<Eclose.Trigger>Open</Eclose.Trigger>
-					<Eclose.Content>
+				<Eclosion.Root>
+					<Eclosion.Trigger>Open</Eclosion.Trigger>
+					<Eclosion.Content>
 						{/* biome-ignore lint/a11y/noAutofocus: what's under test */}
 						<input id="field" autoFocus />
-					</Eclose.Content>
-				</Eclose.Root>
+					</Eclosion.Content>
+				</Eclosion.Root>
 			</StrictMode>,
 		);
 		click(trigger());
@@ -227,10 +227,10 @@ describe("aria", () => {
 
 	it("doesn't point at a title that isn't there", () => {
 		render(
-			<Eclose.Root defaultOpen>
-				<Eclose.Trigger>Open</Eclose.Trigger>
-				<Eclose.Content />
-			</Eclose.Root>,
+			<Eclosion.Root defaultOpen>
+				<Eclosion.Trigger>Open</Eclosion.Trigger>
+				<Eclosion.Content />
+			</Eclosion.Root>,
 		);
 		expect(dialog().hasAttribute("aria-labelledby")).toBe(false);
 	});
@@ -260,17 +260,17 @@ describe("overlay", () => {
 
 function Nested() {
 	return (
-		<Eclose.Root placement="centered" defaultOpen>
-			<Eclose.Trigger>Outer</Eclose.Trigger>
-			<Eclose.Content id="outer">
-				<Eclose.Root>
-					<Eclose.Trigger id="inner-trigger">Menu</Eclose.Trigger>
-					<Eclose.Content id="inner">
+		<Eclosion.Root placement="centered" defaultOpen>
+			<Eclosion.Trigger>Outer</Eclosion.Trigger>
+			<Eclosion.Content id="outer">
+				<Eclosion.Root>
+					<Eclosion.Trigger id="inner-trigger">Menu</Eclosion.Trigger>
+					<Eclosion.Content id="inner">
 						<button id="item" type="button" />
-					</Eclose.Content>
-				</Eclose.Root>
-			</Eclose.Content>
-		</Eclose.Root>
+					</Eclosion.Content>
+				</Eclosion.Root>
+			</Eclosion.Content>
+		</Eclosion.Root>
 	);
 }
 
@@ -279,8 +279,8 @@ describe("nesting", () => {
 		render(<Nested />);
 		click($("#inner-trigger"));
 		await settle();
-		const outerPortal = $("#outer").closest("[data-eclose]");
-		expect($("#inner").closest("[data-eclose]")?.parentElement).toBe(
+		const outerPortal = $("#outer").closest("[data-eclosion]");
+		expect($("#inner").closest("[data-eclosion]")?.parentElement).toBe(
 			outerPortal,
 		);
 		expect($("#inner").closest("[inert]")).toBeNull();

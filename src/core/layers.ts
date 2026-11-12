@@ -1,4 +1,4 @@
-// Every open eclose on the page, oldest first. One set of document listeners
+// Every open eclosion on the page, oldest first. One set of document listeners
 // serves them all, so a nested dialog can decide what a key or a press means
 // for the layers around it.
 

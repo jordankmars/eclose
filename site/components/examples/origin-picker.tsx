@@ -1,6 +1,6 @@
 "use client";
 
-import { Eclose, type Origin } from "eclose/react";
+import { Eclosion, type Origin } from "eclosion/react";
 import { useState } from "react";
 import { ExampleTabs } from "../example-tabs";
 import { ORIGINS } from "./origin-code";
@@ -14,20 +14,22 @@ export function OriginPicker({
 
 	const view = (
 		<>
-			<Eclose.Root origin={origin}>
-				<Eclose.Trigger className="h-9 rounded-lg bg-neutral-900 px-4 text-sm font-medium text-neutral-50 dark:bg-neutral-100 dark:text-neutral-900">
+			<Eclosion.Root origin={origin}>
+				<Eclosion.Trigger className="h-9 rounded-lg bg-neutral-900 px-4 text-sm font-medium text-neutral-50 dark:bg-neutral-100 dark:text-neutral-900">
 					Open
-				</Eclose.Trigger>
-				<Eclose.Content className="grid h-32 w-52 content-between rounded-2xl border border-neutral-200 bg-white p-3 text-sm shadow-lg dark:border-neutral-800 dark:bg-neutral-900">
+				</Eclosion.Trigger>
+				<Eclosion.Content className="grid h-32 w-52 content-between rounded-2xl border border-neutral-200 bg-white p-3 text-sm shadow-lg dark:border-neutral-800 dark:bg-neutral-900">
 					<div className="flex items-center justify-between">
-						<Eclose.Title className="font-mono text-xs">{origin}</Eclose.Title>
-						<Eclose.Close className="text-neutral-500 dark:text-neutral-400" />
+						<Eclosion.Title className="font-mono text-xs">
+							{origin}
+						</Eclosion.Title>
+						<Eclosion.Close className="text-neutral-500 dark:text-neutral-400" />
 					</div>
 					<p className="text-xs text-neutral-500 dark:text-neutral-400">
 						Grows from here.
 					</p>
-				</Eclose.Content>
-			</Eclose.Root>
+				</Eclosion.Content>
+			</Eclosion.Root>
 			<fieldset className="absolute bottom-4 left-4 grid w-fit grid-cols-3 gap-1">
 				<legend className="sr-only">Origin</legend>
 				{ORIGINS.map((value) => (
