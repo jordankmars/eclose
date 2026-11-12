@@ -86,6 +86,14 @@ On touch, dragging down dismisses. Inside a scroller, it only takes over from th
 - Don't pass a `container` that's scaled. Translated is fine.
 - With reduced motion, everything becomes a fade.
 
+## How it works
+
+The engine in `src/core` knows nothing about React. The adapter renders state, and a layout effect hands the elements to the core once they're in the DOM, so a controlled `open` prop takes the same path as a click.
+
+The surface rides five springs: x, y, width, height and corner radius. They're measured in page coordinates rather than the viewport, so a morph keeps pointing at the same place while the page scrolls under it. Each frame, the surface gets a real width and height plus a translate, not a scale, so borders and shadows are drawn exactly while the content inside holds still and is clipped.
+
+Reopening halfway through a close retargets the springs from where they are and keeps their velocity, so the motion bends instead of starting over. Everything that's moving shares one `requestAnimationFrame` loop, which stops on the first frame with nothing left to do.
+
 ## Adapters
 
 | Framework | Import path     | Status      |
