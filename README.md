@@ -104,19 +104,31 @@ Reopening halfway through a close retargets the springs from where they are and 
 
 ## Development
 
+You'll need Node 20 or later and pnpm.
+
 ```sh
 pnpm install
-pnpm play   # playground at localhost:5173
-pnpm test   # unit tests
-pnpm size   # checks the built size against the budget
+pnpm play       # playground at localhost:5173
+pnpm test       # unit tests
+pnpm lint       # biome
+pnpm typecheck
+pnpm size       # checks the built size against the budget
+pnpm site:dev   # docs site
 ```
+
+| Path         | What's there                                    |
+| ------------ | ----------------------------------------------- |
+| `src/core`   | The engine: springs, morphs, focus, scroll lock |
+| `src/react`  | The React adapter, published as `eclose/react`  |
+| `playground` | A Vite page for working on the engine           |
+| `site`       | The docs site, built with Next.js               |
 
 The playground has two halves: demos that drive the core engine directly from
 React, and the same demos built with the public components.
 
 ## Contributing
 
-Contributions are welcome. Please open an issue to discuss changes before submitting a pull request.
+Bug reports and pull requests are welcome. For anything bigger than a fix, open an issue first so we can agree on the approach. CI runs lint, typecheck, tests, the build and the size check on every pull request.
 
 ## License
 
