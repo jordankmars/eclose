@@ -1,8 +1,13 @@
 # eclose
 
+[![CI](https://github.com/jordankmars/eclose/actions/workflows/ci.yml/badge.svg)](https://github.com/jordankmars/eclose/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
+
 > A dialog or popover that grows out of its trigger.
 
 A card becomes a detail view, a button becomes a menu, a pill becomes a panel. It's live DOM, every morph can be interrupted, and it dismisses with a swipe.
+
+It's about 9 kB gzipped, with no dependencies beyond React.
 
 ## Installation
 
@@ -81,6 +86,14 @@ On touch, dragging down dismisses. Inside a scroller, it only takes over from th
 - Don't pass a `container` that's scaled. Translated is fine.
 - With reduced motion, everything becomes a fade.
 
+## How it works
+
+The engine in `src/core` knows nothing about React. The adapter renders state, and a layout effect hands the elements to the core once they're in the DOM, so a controlled `open` prop takes the same path as a click.
+
+The surface rides five springs: x, y, width, height and corner radius. They're measured in page coordinates rather than the viewport, so a morph keeps pointing at the same place while the page scrolls under it. Each frame, the surface gets a real width and height plus a translate, not a scale, so borders and shadows are drawn exactly while the content inside holds still and is clipped.
+
+Reopening halfway through a close retargets the springs from where they are and keeps their velocity, so the motion bends instead of starting over. Everything that's moving shares one `requestAnimationFrame` loop, which stops on the first frame with nothing left to do.
+
 ## Adapters
 
 | Framework | Import path     | Status      |
@@ -91,19 +104,31 @@ On touch, dragging down dismisses. Inside a scroller, it only takes over from th
 
 ## Development
 
+You'll need Node 20 or later and pnpm.
+
 ```sh
 pnpm install
-pnpm play   # playground at localhost:5173
-pnpm test   # unit tests
-pnpm size   # checks the built size against the budget
+pnpm play       # playground at localhost:5173
+pnpm test       # unit tests
+pnpm lint       # biome
+pnpm typecheck
+pnpm size       # checks the built size against the budget
+pnpm site:dev   # docs site
 ```
+
+| Path         | What's there                                    |
+| ------------ | ----------------------------------------------- |
+| `src/core`   | The engine: springs, morphs, focus, scroll lock |
+| `src/react`  | The React adapter, published as `eclose/react`  |
+| `playground` | A Vite page for working on the engine           |
+| `site`       | The docs site, built with Next.js               |
 
 The playground has two halves: demos that drive the core engine directly from
 React, and the same demos built with the public components.
 
 ## Contributing
 
-Contributions are welcome. Please open an issue to discuss changes before submitting a pull request.
+Bug reports and pull requests are welcome. For anything bigger than a fix, open an issue first so we can agree on the approach. CI runs lint, typecheck, tests, the build and the size check on every pull request.
 
 ## License
 

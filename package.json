@@ -1,9 +1,16 @@
 {
 	"name": "eclose",
 	"version": "0.0.0",
-	"description": "",
+	"description": "A dialog or popover that grows out of its trigger.",
 	"keywords": [
-		"react"
+		"react",
+		"dialog",
+		"popover",
+		"modal",
+		"animation",
+		"morph",
+		"spring",
+		"shared-element-transition"
 	],
 	"homepage": "https://github.com/jordankmars/eclose#readme",
 	"bugs": {
